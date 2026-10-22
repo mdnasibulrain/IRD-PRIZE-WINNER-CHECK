@@ -1,0 +1,2449 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MD. NS Ebook Store — Practical Digital Ebooks & Career Resources</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel Standalone for JSX compilation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&display=swap');
+        
+        :root {
+            --section-background: #FFFBEB;
+            --card-background: #FFFFFF;
+            --main-navy-text: #0F172A;
+            --secondary-text: #475569;
+            --muted-text: #64748B;
+            --muted-price: #94A3B8;
+            --gold-primary: #F59E0B;
+            --gold-hover: #D97706;
+            --gold-dark-text: #B45309;
+            --gold-badge-text: #92400E;
+            --gold-badge-background: #FEF3C7;
+            --gold-border: #FCD34D;
+            --inner-panel-background: #FFFBEB;
+            --inner-panel-border: #FDE68A;
+            --book-icon-background: #DBEAFE;
+            --book-icon-colour: #1D4ED8;
+            --savings-background: #D1FAE5;
+            --savings-border: #6EE7B7;
+            --savings-main-text: #065F46;
+            --savings-secondary-text: #047857;
+            --trust-panel-background: #F8FAFC;
+            --trust-panel-border: #E2E8F0;
+            --success-icon: #059669;
+        }
+
+        body {
+            font-family: Inter, "Noto Sans Devanagari", Arial, sans-serif;
+            background-color: var(--section-background);
+            color: var(--main-navy-text);
+            overflow-x: hidden;
+        }
+
+        .bg-section { background-color: var(--section-background); }
+        .bg-card { background-color: var(--card-background); }
+        .text-navy { color: var(--main-navy-text); }
+        .text-secondary { color: var(--secondary-text); }
+        .text-muted { color: var(--muted-text); }
+        .text-muted-price { color: var(--muted-price); }
+        
+        .bg-gold { background-color: var(--gold-primary); }
+        .bg-gold-hover:hover { background-color: var(--gold-hover); }
+        .text-gold-dark { color: var(--gold-dark-text); }
+        .text-gold-badge { color: var(--gold-badge-text); }
+        .bg-gold-badge { background-color: var(--gold-badge-background); }
+        .border-gold { border-color: var(--gold-border); }
+
+        .bg-inner-panel { background-color: var(--inner-panel-background); }
+        .border-inner-panel { border-color: var(--inner-panel-border); }
+
+        .bg-book-icon { background-color: var(--book-icon-background); }
+        .text-book-icon { color: var(--book-icon-colour); }
+
+        .bg-savings { background-color: var(--savings-background); }
+        .border-savings { border-color: var(--savings-border); }
+        .text-savings-main { color: var(--savings-main-text); }
+        .text-savings-sec { color: var(--savings-secondary-text); }
+
+        .bg-trust { background-color: var(--trust-panel-background); }
+        .border-trust { border-color: var(--trust-panel-border); }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FEF3C7;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #F59E0B;
+            border-radius: 4px;
+        }
+
+        /* Continuous Right-to-Left Ticker Animation */
+        @keyframes marquee {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
+        }
+        
+        .animate-marquee {
+            display: flex;
+            width: max-content;
+            animation: marquee 28s linear infinite;
+        }
+
+        .animate-marquee:hover {
+            animation-play-state: paused;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-20 md:pb-0">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+
+        // BRAND CONFIGURATION
+        const BRAND_CONFIG = {
+            storeName: "NS EBOOKS",
+            tagline: "MD. NS Practical Skills",
+            authorName: "MD. NS (MD. NASA)",
+            whatsappNumber: "+977 9702784684",
+            whatsappRaw: "9779702784684",
+            supportEmail: "mdnasibulrain4@gmail.com",
+            websiteUrl: "https://www.nasibul.com.np/",
+            nspayUrl: "https://www.nasibul.com.np/nspay",
+            deliveryTarget: "3–5 minutes"
+        };
+
+        const CATEGORIES = [
+            { id: "computer-skills", name: "Computer Skills", icon: "laptop" },
+            { id: "digital-skills-online-income", name: "Digital Skills & Online Income", icon: "globe" },
+            { id: "loksewa", name: "LokSewa Preparation", icon: "book-open" },
+            { id: "share-market", name: "Share Market Fundamentals", icon: "trending-up" },
+            { id: "personality-development", name: "Personality Development", icon: "user-check" },
+            { id: "nepali-youth-career-guides", name: "Nepali Youth Career Guides", icon: "compass" }
+        ];
+
+        // LINKED FLASH ANNOUNCEMENTS FOR THE TICKER
+        const INITIAL_FLASH_ANNOUNCEMENTS = [
+            { text: "⚡ Flash Sale — Complete Computer Operator Guide (50% OFF)!", productId: "eb-001" },
+            { text: "🔥 Limited-Time Offer — Freelancing & Digital Skills Blueprint (54% OFF)!", productId: "eb-002" },
+            { text: "🎁 Super Combo Offer — Ultimate Career Bundle मा 75% सम्म बचत गर्नुहोस्!", bundleId: "bundle-ultimate-career" },
+            { text: "📚 LokSewa Exam Special — Smart GK & Exam Strategy Ebook!", productId: "eb-003" },
+            { text: "📈 Share Market Starter — NEPSE Beginner Guide केवल रु. ३९९ मा!", productId: "eb-004" },
+            { text: "🗣️ Career Boost — Confidence & Interview Success Guide!", productId: "eb-005" }
+        ];
+
+        const INITIAL_PRODUCTS = [
+            {
+                id: "eb-001",
+                slug: "complete-computer-operator-guide",
+                category: "computer-skills",
+                productType: "Single Ebook",
+                title: "Complete Computer Operator & Office Skills Guide",
+                subtitle: "MS Office, Typing, Shortcut Keys र Practical Office Work मा पोख्त हुनुहोस्",
+                summary: "नेपाली कार्यालय, डाटा इन्ट्री र कम्प्युटर अपरेटर तयारीका लागि सम्पूर्ण व्यवहारिक गाइड।",
+                description: "यो Ebook ले तपाईंलाई MS Word, MS Excel, PowerPoint, नेपाली/अंग्रेजी टाइपिंग, र कम्प्युटर ट्रबलशूटिंगको व्यवहारिक ज्ञान दिन्छ। Computer Operator परीक्षा वा Office Job को लागि उपयुक्त।",
+                coverImage: { type: "image", source: "https://placehold.co/600x800/0f172a/f59e0b?text=Computer+Skills+Guide" },
+                galleryImages: [],
+                previewPdf: null,
+                pages: 180,
+                chapters: 12,
+                pricing: { regularPrice: 999, salePrice: 499 },
+                regularPrice: 999,
+                salePrice: 499,
+                tags: ["Computer Skills", "MS Office", "Office Operator", "Typing"],
+                learningOutcomes: [
+                    "MS Word र Excel मा Professional Document तथा Sheet तयार गर्ने",
+                    "द्रुत नेपाली (Preeti / Unicode) र अंग्रेजी टाइपिंग कमान्ड गर्ने",
+                    "कार्यालयमा दैनिक प्रयोग हुने Important Computer Shortcuts प्रयोग गर्ने",
+                    "File Management र Email Communication व्यवस्थित गर्ने"
+                ],
+                careerRelevance: [
+                    "Office Assistant र Data Entry Operator पदका लागि सहयोगी",
+                    "LokSewa Computer Operator प्रयोगात्मक परीक्षा तयारी",
+                    "निजी कार्यालय तथा संस्थामा रोजगार तयारी"
+                ],
+                chapterOutline: [
+                    { number: 1, title: "Computer Basics & Operating System", description: "कम्प्युटरका आधारभूत सिद्धान्त र Windows setup" },
+                    { number: 2, title: "Nepali & English Typing Mastery", description: "टाइपिंग स्पीड र एक्युरेसी बढाउने उपाय" },
+                    { number: 3, title: "MS Word Professional Formatting", description: "अफिसियल पत्र, प्रतिवेदन र फारम डिजाइन" },
+                    { number: 4, title: "MS Excel Formulas & Data Handling", description: "Sum, VLOOKUP, Pivot Table र Accounting Sheet" },
+                    { number: 5, title: "Internet, Email & Office Utilities", description: "सुरक्षित ब्राउजिङ, इमेल शिष्टाचार र प्रिन्टर सेटिङ" }
+                ],
+                marketing: {
+                    headline: "कार्यालय काममा एक्सपर्ट बन्नुहोस्",
+                    hook: "कम्प्युटर सम्बन्धी आधारभूत ज्ञान र अपरेटर सीप सिक्ने सरल नेपाली गाइड।",
+                    offerBadge: "BESTSELLER 50% OFF",
+                    urgencyText: "Limited Copies Offer",
+                    ctaText: "Get Ebook – रु. 499"
+                },
+                bonuses: [
+                    { title: "Top 100 Excel Shortcuts Sheet", description: "द्रुत कामको लागि उपयोगी" }
+                ],
+                faqs: [
+                    { question: "के यो मोबाइलमा पढ्न मिल्छ?", answer: "मिल्छ, यो साधारण PDF फाइल हो।" }
+                ],
+                offerLabel: "BESTSELLER 50% OFF",
+                urgencyLabel: "Limited Copies Offer",
+                rating: 4.9,
+                reviewCount: 142,
+                soldCopies: 850,
+                status: "Published",
+                isFeatured: true,
+                isNew: false,
+                isPublished: true,
+                updatedAt: "2026-10-20"
+            },
+            {
+                id: "eb-002",
+                slug: "freelancing-digital-skills-blueprint",
+                category: "digital-skills-online-income",
+                productType: "Single Ebook",
+                title: "Freelancing & Digital Skills Blueprint for Nepali Youth",
+                subtitle: "घरमै बसेर Digital Skills सिक्ने र International Client सँग काम गर्ने गाइड",
+                summary: "Upwork, Fiverr र Remote Work मा सफलता प्राप्त गर्ने व्यवहारिक रणनीति।",
+                description: "नेपालमा बसेर डिजिटल सीप जस्तै Graphic Design, Content Writing, Virtual Assistance र Social Media Management मार्फत अनलाइन आम्दानीका अवसर बुझ्ने र सुरु गर्ने तरिका।",
+                coverImage: { type: "image", source: "https://placehold.co/600x800/0f172a/f59e0b?text=Digital+Skills+Blueprint" },
+                galleryImages: [],
+                previewPdf: null,
+                pages: 210,
+                chapters: 14,
+                pricing: { regularPrice: 1299, salePrice: 599 },
+                regularPrice: 1299,
+                salePrice: 599,
+                tags: ["Digital Skills", "Freelancing", "Online Income", "Remote Work"],
+                learningOutcomes: [
+                    "हाई-डिमान्ड Digital Skills चयन र सिकाइ रोडम्याप",
+                    "Fiverr र Upwork मा आकर्षित Profile तयार गर्ने",
+                    "विदेशी ग्राहकसँग व्यवहारिक Communication र Proposal लेखन",
+                    "नेपालमा Payment प्राप्त गर्ने वैधानिक तरिकाहरू बुझ्ने"
+                ],
+                careerRelevance: [
+                    "Global Remote Job र Freelance Contract प्राप्त गर्न",
+                    "Self-employment र Digital Agency सुरु गर्न",
+                    "पढाइसँगै पार्ट-टाइम आम्दानी अवसर"
+                ],
+                chapterOutline: [
+                    { number: 1, title: "Understanding Digital Economy", description: "डिजिटल स्किल र ग्लोबल मार्केटको सम्भावना" },
+                    { number: 2, title: "Choosing Your Skill Track", description: "राइटिङ, डिजाइन वा टेक स्किल छनोट" },
+                    { number: 3, title: "Profile Creation & Branding", description: "पोर्टफोलियो र प्रोफाईल सेटअप" },
+                    { number: 4, title: "Winning Proposal Writing", description: "क्लाइन्ट आकर्षित गर्ने प्रस्तावना कसरी लेख्ने" }
+                ],
+                marketing: {
+                    headline: "घरमै बसेर डलर कमाउने डिजिटल रोडम्याप",
+                    hook: "Fiverr, Upwork र Remote Jobs मा काम पाउन आवश्यक कभर गाइड।",
+                    offerBadge: "HOT DEAL 54% OFF",
+                    urgencyText: "Popular Choice",
+                    ctaText: "Get Ebook – रु. 599"
+                },
+                bonuses: [],
+                faqs: [],
+                offerLabel: "HOT DEAL 54% OFF",
+                urgencyLabel: "Popular Choice",
+                rating: 4.8,
+                reviewCount: 98,
+                soldCopies: 620,
+                status: "Published",
+                isFeatured: true,
+                isNew: true,
+                isPublished: true,
+                updatedAt: "2026-10-21"
+            },
+            {
+                id: "eb-003",
+                slug: "smart-loksewa-gk-iq-guide",
+                category: "loksewa",
+                productType: "Single Ebook",
+                title: "Smart LokSewa General Knowledge & Exam Strategy",
+                subtitle: "लोकसेवा प्रथम पत्र (GK & IQ) मा उच्च अंक ल्याउने तयारी गाइड",
+                summary: "स्मार्ट अध्ययन विधि, नेपाल र विश्व भूगोल, इतिहास र समसामयिक विषय।",
+                description: "खरिदार, नायब सुब्बा र शाखा अधिकृत परीक्षाका लागि विषयवस्तुलाई सम्झन सजिलो ट्रिक्स र माइन्डम्याप सहितको व्यवस्थित तयारी पुस्तक।",
+                coverImage: { type: "image", source: "https://placehold.co/600x800/0f172a/f59e0b?text=LokSewa+Exam+Guide" },
+                galleryImages: [],
+                previewPdf: null,
+                pages: 250,
+                chapters: 16,
+                pricing: { regularPrice: 1100, salePrice: 499 },
+                regularPrice: 1100,
+                salePrice: 499,
+                tags: ["LokSewa", "GK & IQ", "Kharidar", "Nasu", "Section Officer"],
+                learningOutcomes: [
+                    "GK सम्झने सम्झना ट्रिक्स (Memory Tricks)",
+                    "IQ Questions छिटो र सही हल गर्ने विधि",
+                    "वस्तुगत (MCQ) प्रश्न हल गर्दा ध्यान दिनुपर्ने कुराहरू",
+                    "परीक्षा अघिको समय व्यवस्थापन (Time Management)"
+                ],
+                careerRelevance: [
+                    "निजामती सेवाका विभिन्न तहको प्रथम पत्र परीक्षा",
+                    "नेपाल राष्ट्र बैंक, संस्थान तथा सुरक्षा निकाय परीक्षा",
+                    "शिक्षक सेवा आयोग सामान्य परीक्षा"
+                ],
+                chapterOutline: [
+                    { number: 1, title: "Nepal Geography & Environment", description: "नेपालको भूगोल, नदीनाला र हावापानी ट्रिक्स" },
+                    { number: 2, title: "History & Socio-Cultural Facts", description: "नेपालको इतिहास र सांस्कृतिक पक्ष" },
+                    { number: 3, title: "International Affairs & Organizations", description: "संयुक्त राष्ट्रसंघ, SAARC र विश्व घटनाक्रम" },
+                    { number: 4, title: "IQ Shortcut Methods", description: "शाब्दिक र अशाब्दिक तर्कशक्ति प्रश्न" }
+                ],
+                marketing: {
+                    headline: "लोकसेवा परीक्षामा सफलता हासिल गर्नुहोस्",
+                    hook: "GK र IQ सजिलै याद राख्ने वैज्ञानिक विधि।",
+                    offerBadge: "EXAM SPECIAL",
+                    urgencyText: "High Demand",
+                    ctaText: "Get Ebook – रु. 499"
+                },
+                bonuses: [],
+                faqs: [],
+                offerLabel: "EXAM SPECIAL",
+                urgencyLabel: "High Demand",
+                rating: 4.9,
+                reviewCount: 210,
+                soldCopies: 1200,
+                status: "Published",
+                isFeatured: true,
+                isNew: false,
+                isPublished: true,
+                updatedAt: "2026-10-18"
+            },
+            {
+                id: "eb-004",
+                slug: "nepali-share-market-fundamentals",
+                category: "share-market",
+                productType: "Single Ebook",
+                title: "Nepali Share Market Fundamentals: NEPSE Beginner Guide",
+                subtitle: "Primary (IPO) र Secondary Market मा सही र सुरक्षित लगानी कसरी गर्ने?",
+                summary: "IPO भर्ने तरिकादेखि Fundamental र Technical Analysis को आधारभूत ज्ञान।",
+                description: "नेपाली शेयर बजारमा नयाँ हुनुहुन्छ? यो पुस्तकले Demat, MeroShare, IPO, Dividend, Microfinance, Hydro, Commercial Banks को Financial Report विश्लेषण गर्न सिकाउँछ।",
+                coverImage: { type: "image", source: "https://placehold.co/600x800/0f172a/f59e0b?text=NEPSE+Share+Market" },
+                galleryImages: [],
+                previewPdf: null,
+                pages: 160,
+                chapters: 10,
+                pricing: { regularPrice: 899, salePrice: 399 },
+                regularPrice: 899,
+                salePrice: 399,
+                tags: ["Share Market", "NEPSE", "IPO", "Investment", "Finance"],
+                learningOutcomes: [
+                    "Demat र MeroShare खाता सञ्चालन र IPO भर्ने सही तरिका",
+                    "कम्पनीको EPS, P/E Ratio र Net Worth विश्लेषण गर्ने विधि",
+                    "Secondary Market मा Broker System र TMS प्रयोग गर्ने तरिका",
+                    "दीर्घकालीन लगानी (Value Investing) र जोखिम व्यवस्थापन"
+                ],
+                careerRelevance: [
+                    "व्यक्तिगत वित्तीय साक्षरता र सम्पत्ति वृद्धि",
+                    "शेयर बजार विश्लेषक वा लगानीकर्ता बन्ने आधार",
+                    "वित्तीय बजारसम्बन्धी ज्ञान अभिवृद्धि"
+                ],
+                chapterOutline: [
+                    { number: 1, title: "Introduction to NEPSE & SEBON", description: "शेयर बजारको संरचना र नियमक निकाय" },
+                    { number: 2, title: "Primary Market & IPO Application", description: "IPO, FPO र Right Share को आधार" },
+                    { number: 3, title: "Fundamental Analysis Basics", description: "वित्तीय विवरण कसरी पढ्ने" },
+                    { number: 4, title: "Risk Management & Portfolio Design", description: "घाटाबाट जोगिने र विविधीकरण गर्ने रणनीति" }
+                ],
+                marketing: {
+                    headline: "शेयर बजारमा सही लगानीको सुरुआत",
+                    hook: "घाटाबाट बचेर सुरक्षित आम्दानी गर्ने NEPSE गाइड।",
+                    offerBadge: "FINANCE SPECIAL",
+                    urgencyText: "Beginner Friendly",
+                    ctaText: "Get Ebook – रु. 399"
+                },
+                bonuses: [],
+                faqs: [],
+                offerLabel: "FINANCE SPECIAL",
+                urgencyLabel: "Beginner Friendly",
+                rating: 4.7,
+                reviewCount: 85,
+                soldCopies: 510,
+                status: "Published",
+                isFeatured: false,
+                isNew: true,
+                isPublished: true,
+                updatedAt: "2026-10-19"
+            },
+            {
+                id: "eb-005",
+                slug: "confidence-communication-interview-success",
+                category: "personality-development",
+                productType: "Single Ebook",
+                title: "Confidence, Communication & Interview Success Guide",
+                subtitle: "बोल्ने कला, व्यक्तित्व विकास र Job Interview मा सफलता",
+                summary: "आत्मविश्वास बढाउन, धक फुकाउन र अन्तरवार्तामा सफल हुने व्यावहारिक उपाय।",
+                description: "इन्टरभ्यु दिँदा डर लाग्छ? सार्वजनिक ठाउँमा बोल्न अप्ठ्यारो हुन्छ? यो Ebook ले तपाईंको Personality, Body Language, Communication र Interview Skills सुधार्छ।",
+                coverImage: { type: "image", source: "https://placehold.co/600x800/0f172a/f59e0b?text=Interview+%26+Personality" },
+                galleryImages: [],
+                previewPdf: null,
+                pages: 140,
+                chapters: 9,
+                pricing: { regularPrice: 799, salePrice: 349 },
+                regularPrice: 799,
+                salePrice: 349,
+                tags: ["Personality Development", "Communication", "Interview Prep", "Confidence"],
+                learningOutcomes: [
+                    "सार्वजनिक बोल्दा (Public Speaking) डर हटाउने प्रविधि",
+                    "प्रभावशाली Body Language र Visual Impression",
+                    "Interview मा सोधिने कडा प्रश्नहरूको उत्कृष्ट उत्तर कसरी दिने",
+                    "कार्यस्थलमा मिलाएर बोल्ने र नेटवर्किङ गर्ने कला"
+                ],
+                careerRelevance: [
+                    "कुनै पनि Job Interview मा निर्धक्क प्रस्तुत हुन",
+                    "कार्यालयमा प्रस्तुतिकरण (Presentation) र नेतृत्व",
+                    "व्यक्तिगत जीवनमा उच्च आत्मविश्वास"
+                ],
+                chapterOutline: [
+                    { number: 1, title: "Building Inner Confidence", description: "हिचकिचाहट र डर हटाउने अभ्यास" },
+                    { number: 2, title: "Body Language & Eye Contact", description: "सकारात्मक शारीरिक भाषा" },
+                    { number: 3, title: "Top 20 Interview Questions", description: "उत्कृष्ट नमुना उत्तरहरू र तयारी" },
+                    { number: 4, title: "Professional Workplace Ethics", description: "व्यावसायिक व्यवहार र पोशाक" }
+                ],
+                marketing: {
+                    headline: "आफ्नो आत्मविश्वास र बोल्ने क्षमता बढाउनुहोस्",
+                    hook: "अन्तरवार्ता र दैनिक व्यवहारमा सफलता प्राप्त गर्ने कला।",
+                    offerBadge: "CAREER BOOST",
+                    urgencyText: "Essential Guide",
+                    ctaText: "Get Ebook – रु. 349"
+                },
+                bonuses: [],
+                faqs: [],
+                offerLabel: "CAREER BOOST",
+                urgencyLabel: "Essential Guide",
+                rating: 4.9,
+                reviewCount: 115,
+                soldCopies: 730,
+                status: "Published",
+                isFeatured: false,
+                isNew: false,
+                isPublished: true,
+                updatedAt: "2026-10-15"
+            },
+            {
+                id: "eb-006",
+                slug: "nepali-youth-career-roadmap",
+                category: "nepali-youth-career-guides",
+                productType: "Single Ebook",
+                title: "Nepali Youth Career Roadmap & Job Search Masterclass",
+                subtitle: "CV / Resume लेखन, Job Search रणनीति र career direction छनोट",
+                summary: "प्लस टु वा ब्याचलर्स पछि सही बाटो रोज्न र छिटो जागिर पाउन मार्गदर्शन।",
+                description: "नेपाली युवाहरूका लागि आफ्नो करियरको लक्ष्य तय गर्ने, आकर्षक CV/Resume बनाउने, merojob, jobsnepal, LinkedIn प्रयोग गरी जागिर खोज्ने व्यावहारिक Ebook।",
+                coverImage: { type: "image", source: "https://placehold.co/600x800/0f172a/f59e0b?text=Youth+Career+Roadmap" },
+                galleryImages: [],
+                previewPdf: null,
+                pages: 175,
+                chapters: 11,
+                pricing: { regularPrice: 899, salePrice: 399 },
+                regularPrice: 899,
+                salePrice: 399,
+                tags: ["Career Guide", "CV Writing", "Job Search", "Nepali Youth"],
+                learningOutcomes: [
+                    "HR ले रुचाउने ATS-Friendly Professional CV/Resume निर्माण",
+                    "LinkedIn Profile Optimal बनाउने र Networking गर्ने",
+                    "नेपालका प्रमुख Job Portals प्रयोग गरी अवसर खोज्ने",
+                    "Career Direction र Short/Long term लक्ष्य निर्धारण"
+                ],
+                careerRelevance: [
+                    "सधैं नयाँ स्नातक (Fresh Graduates) का लागि पहिलो जागिर",
+                    "करियर परिवर्तन (Career Switch) गर्न चाहनेका लागि",
+                    "रोजगारी खोज्ने रणनीति व्यवस्थित बनाउन"
+                ],
+                chapterOutline: [
+                    { number: 1, title: "Understanding Job Market in Nepal", description: "नेपालमा बजारको माग र सीप" },
+                    { number: 2, title: "Crafting High-Impact Resume", description: "रिज्युमे नमुना र गल्तीहरू" },
+                    { number: 3, title: "Digital Job Search Strategies", description: "मेरोजब र लिङ्क्डइनको प्रयोग" },
+                    { number: 4, title: "First 90 Days in a Job", description: "कार्यस्थलमा छाप छाड्ने कला" }
+                ],
+                marketing: {
+                    headline: "सही करियर छनोट र Job Search रणनीति",
+                    hook: "आकर्षक CV बनाउन र छिटो रोजगारी पाउन व्यावहारिक Masterclass।",
+                    offerBadge: "RECOMMENDED",
+                    urgencyText: "High Value",
+                    ctaText: "Get Ebook – रु. 399"
+                },
+                bonuses: [],
+                faqs: [],
+                offerLabel: "RECOMMENDED",
+                urgencyLabel: "High Value",
+                rating: 4.8,
+                reviewCount: 94,
+                soldCopies: 490,
+                status: "Published",
+                isFeatured: false,
+                isNew: false,
+                isPublished: true,
+                updatedAt: "2026-10-12"
+            }
+        ];
+
+        const CURATED_BUNDLES = [
+            {
+                id: "bundle-ultimate-career",
+                title: "Ultimate Nepali Youth Career & Digital Super Bundle",
+                subtitle: "६ वटै Ebooks को पूर्ण प्याकेज — सर्वाधिक बचत र सम्पूर्ण करियर रूपान्तरण!",
+                summary: "कम्प्युटर, डिजिटल सीप, लोकसेवा, शेयर बजार, व्यक्तित्व र करियर गाइड सबै एकै ठाउँमा।",
+                includedProductIds: ["eb-001", "eb-002", "eb-003", "eb-004", "eb-005", "eb-006"],
+                regularPrice: 5986,
+                salePrice: 1499,
+                badge: "ULTIMATE VALUE (75% OFF)",
+                image: "https://placehold.co/800x600/0f172a/f59e0b?text=Ultimate+Career+Super+Bundle"
+            },
+            {
+                id: "bundle-digital-office",
+                title: "Office & Digital Income Master Bundle",
+                subtitle: "Computer Skills + Freelancing Blueprint",
+                summary: "कार्यालय काम र अनलाइन आम्दानी दुवैमा पोख्त हुन २ प्रमुख Ebook प्याकेज।",
+                includedProductIds: ["eb-001", "eb-002"],
+                regularPrice: 2298,
+                salePrice: 899,
+                badge: "SAVINGS BUNDLE",
+                image: "https://placehold.co/800x600/0f172a/f59e0b?text=Digital+%26+Office+Bundle"
+            }
+        ];
+
+        const FAQS = [
+            {
+                q: "Ebook भनेको के हो र यो कसरी प्राप्त हुन्छ?",
+                a: "Ebook (Electronic Book) डिजिटल पुस्तक हो जसलाई तपाईं आफ्नो मोबाइल, ट्याब्लेट वा कम्प्युटरमा सजिलै पठन पाठन गर्न सक्नुहुन्छ। Payment गरेपछि यो PDF फाइलको रूपमा तपाईंको WhatsApp वा Email मा ३-५ मिनेट भित्र पठाइन्छ।"
+            },
+            {
+                q: "कुन-कुन विषयका Ebook उपलब्ध छन्?",
+                a: "हामीसँग ६ प्रमुख विधामा Ebooks उपलब्ध छन्: Computer Skills, Digital Skills & Online Income, LokSewa Preparation, Share Market Fundamentals, Personality Development, र Nepali Youth Career Guides।"
+            },
+            {
+                q: "Ebook किन्नुअघि Preview हेर्न मिल्छ?",
+                a: "अवश्य! हरेक Ebook को विवरणमा 'Preview' बटन राखिएको छ। त्यहाँ क्लिक गरेर तपाईंले नमुना अध्याय (Sample Chapter PDF) अध्ययन गर्न सक्नुहुन्छ।"
+            },
+            {
+                q: "म एकभन्दा बढी Ebook किन्न सक्छु? डिस्काउन्ट पाइन्छ?",
+                a: "पाइन्छ! तपाईंले एकै पटक धेरै Ebooks किन्न सक्नुहुन्छ। 'Custom Combo Builder' प्रयोग गरेर आफूलाई चाहिने Ebooks छान्दा थप Discount प्राप्त हुन्छ, अथवा हाम्रा सस्तो 'Best Bundle Offers' छनोट गर्न सक्नुहुन्छ।"
+            },
+            {
+                q: "Custom Combo भनेको के हो?",
+                a: "Custom Combo मा तपाईंले उपलब्ध ६ वटा Ebooks मध्ये आफूलाई चाहिएका दुई वा सोभन्दा बढी Ebooks आफैं रोजेर आफ्नै प्याकेज बनाउन सक्नुहुन्छ। प्रणालीले स्वतः Discount हिसाब गरेर कुल रकम घटाउँछ।"
+            },
+            {
+                q: "Payment कसरी गर्ने?",
+                a: "Cart मा Ebook/Combo थपेपछि 'NSPAY मा Payment गर्न जानुहोस्' मा क्लिक गर्नुहोस्। यसले तपाईंलाई सुरक्षित NSPAY Payment Page (https://www.nasibul.com.np/nspay) मा लैजानेछ जहाँ उपलब्ध eSewa, Khalti, Fonepay वा बैंक ट्रान्सफर निर्देश पालना गर्न सक्नुहुन्छ।"
+            },
+            {
+                q: "Payment गरेपछि के गर्नुपर्छ?",
+                a: "Payment सम्पन्न गरेपछि प्राप्त सफल कारोबारको Screenshot वा विवरण NSPAY को निर्देश अनुसार वा हाम्रा Support WhatsApp (+977 9702784684) मा पठाउनुपर्छ।"
+            },
+            {
+                q: "Ebook कति समयमा प्राप्त हुन्छ?",
+                a: "तपाईंको Payment विवरण र Screenshot प्राप्त भई confirm भएपछि साधारणतया ३ देखि ५ मिनेट भित्र WhatsApp वा Email मा Ebook पठाइन्छ।"
+            },
+            {
+                q: "के Ebook मोबाइलमा पढ्न सकिन्छ?",
+                a: "मिल्छ। यी Ebooks सामान्य PDF ढाँचामा हुन्छन्, जसलाई जुनसुकै Smartphone (Android/iPhone) वा Laptop मा बिना कुनै समस्या पढ्न सकिन्छ।"
+            },
+            {
+                q: "के Ebook पढेपछि जागिर वा आम्दानीको १००% guarantee हुन्छ?",
+                a: "हुँदैन। हाम्रा Ebooks ले तपाईंलाई व्यवहारिक ज्ञान, सीप र तयारीको बाटो देखाउँछन्। वास्तविक सफलता तपाईंको निरन्तर अभ्यास, मिहिनेत र बजारको परिस्थितिमा निर्भर हुन्छ। कुनै पनि भ्रामक ग्यारेन्टी दिइँदैन।"
+            },
+            {
+                q: "Share Market Ebook ले निश्चित Profit guarantee गर्छ?",
+                a: "गर्दैन। शेयर बजार जोखिमयुक्त हुन्छ। पुस्तकको सामग्री केवल शैक्षिक र साक्षरता प्रयोजन (Educational Purpose) का लागि हो। लगानी सम्बन्धी निर्णय आफ्नै जोखिममा लिनुपर्छ।"
+            },
+            {
+                q: "कहीँ केही द्विविधा वा समस्या भए कसरी सम्पर्क गर्ने?",
+                a: "हाम्रो आधिकारिक WhatsApp +977 9702784684 वा Email: mdnasibulrain4@gmail.com मा जुनसुकै बेला सम्पर्क गरी सहयोग लिन सक्नुहुन्छ।"
+            }
+        ];
+    </script>
+
+    <script type="text/babel">
+        function App() {
+            // STATE MANAGEMENT
+            const [products, setProducts] = useState(() => {
+                const saved = localStorage.getItem("mdns_products");
+                return saved ? JSON.parse(saved) : INITIAL_PRODUCTS;
+            });
+
+            // Save products to localStorage on updates
+            useEffect(() => {
+                localStorage.setItem("mdns_products", JSON.stringify(products));
+            }, [products]);
+
+            const [flashAnnouncements] = useState(INITIAL_FLASH_ANNOUNCEMENTS);
+            
+            const [selectedCategory, setSelectedCategory] = useState("all");
+            const [searchQuery, setSearchQuery] = useState("");
+            const [sortBy, setSortBy] = useState("featured");
+
+            const [cart, setCart] = useState([]);
+            const [isCartOpen, setIsCartOpen] = useState(false);
+
+            const [activeModalProduct, setActiveModalProduct] = useState(null);
+            const [previewPdfAsset, setPreviewPdfAsset] = useState(null);
+            const [previewImageAsset, setPreviewImageAsset] = useState(null);
+            const [policyModalContent, setPolicyModalContent] = useState(null);
+
+            const [toastMessage, setToastMessage] = useState(null);
+
+            // Custom combo builder state
+            const [comboSelectedIds, setComboSelectedIds] = useState([]);
+
+            // ADMIN / PRODUCT MANAGER STATES
+            const [isAdminMode, setIsAdminMode] = useState(false);
+            const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => {
+                return localStorage.getItem("mdns_admin_auth") === "true";
+            });
+            const [adminPasscode, setAdminPasscode] = useState("");
+            const [adminLoginError, setAdminLoginError] = useState("");
+            const [adminActiveTab, setAdminActiveTab] = useState("dashboard"); // dashboard, products, add-product, offers, media, settings
+            
+            // Product Editor State
+            const [editingProductId, setEditingProductId] = useState(null);
+            const [productForm, setProductForm] = useState(getEmptyProductForm());
+
+            function getEmptyProductForm() {
+                return {
+                    id: "",
+                    slug: "",
+                    category: "computer-skills",
+                    productType: "Single Ebook",
+                    title: "",
+                    subtitle: "",
+                    summary: "",
+                    description: "",
+                    coverImage: { type: "image", source: "https://placehold.co/600x800/0f172a/f59e0b?text=Ebook+Cover" },
+                    galleryImages: [],
+                    previewPdf: null,
+                    pages: 100,
+                    chapters: 10,
+                    regularPrice: 499,
+                    salePrice: 299,
+                    tags: "",
+                    learningOutcomes: [""],
+                    chapterOutline: [{ number: 1, title: "", description: "" }],
+                    headline: "",
+                    hook: "",
+                    offerBadge: "SPECIAL OFFER",
+                    urgencyText: "Limited Time",
+                    ctaText: "Get Ebook",
+                    bonuses: [],
+                    faqs: [],
+                    status: "Published",
+                    isFeatured: false,
+                    isNew: true
+                };
+            }
+
+            // Helper toast
+            const showToast = (msg) => {
+                setToastMessage(msg);
+                setTimeout(() => setToastMessage(null), 3000);
+            };
+
+            const scrollToSection = (id) => {
+                if (isAdminMode) {
+                    setIsAdminMode(false);
+                    setTimeout(() => {
+                        const el = document.getElementById(id);
+                        if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
+                } else {
+                    const el = document.getElementById(id);
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }
+            };
+
+            // ANNOUNCEMENT CLICK HANDLER
+            const handleAnnouncementClick = (ann) => {
+                if (isAdminMode) setIsAdminMode(false);
+                if (ann.productId) {
+                    const foundProd = products.find(p => p.id === ann.productId);
+                    if (foundProd) {
+                        setActiveModalProduct(foundProd);
+                        return;
+                    }
+                }
+                if (ann.bundleId) {
+                    scrollToSection('bundles');
+                    return;
+                }
+                scrollToSection('explore');
+            };
+
+            // FILTER & SORT PRODUCTS FOR CUSTOMER
+            const filteredProducts = useMemo(() => {
+                return products.filter(p => {
+                    if (p.status === "Draft" || p.status === "Archived" || p.status === "Hidden") return false;
+                    const matchesCategory = selectedCategory === "all" || p.category === selectedCategory;
+                    const q = searchQuery.toLowerCase().trim();
+                    const matchesSearch = !q || 
+                        p.title.toLowerCase().includes(q) ||
+                        p.subtitle.toLowerCase().includes(q) ||
+                        (p.summary && p.summary.toLowerCase().includes(q)) ||
+                        (p.tags && Array.isArray(p.tags) && p.tags.some(t => t.toLowerCase().includes(q)));
+                    return matchesCategory && matchesSearch;
+                }).sort((a, b) => {
+                    const priceA = a.pricing?.salePrice || a.salePrice || 0;
+                    const priceB = b.pricing?.salePrice || b.salePrice || 0;
+                    const regA = a.pricing?.regularPrice || a.regularPrice || 0;
+                    const regB = b.pricing?.regularPrice || b.regularPrice || 0;
+
+                    if (sortBy === "price-low") return priceA - priceB;
+                    if (sortBy === "price-high") return priceB - priceA;
+                    if (sortBy === "discount") return ((regB - priceB)/regB) - ((regA - priceA)/regA);
+                    if (sortBy === "newest") return b.isNew ? 1 : -1;
+                    return (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0);
+                });
+            }, [products, selectedCategory, searchQuery, sortBy]);
+
+            // CART HANDLERS
+            const addToCart = (item, type = "single") => {
+                let cartItem;
+                if (type === "single") {
+                    cartItem = {
+                        id: item.id,
+                        title: item.title,
+                        cover: item.coverImage?.source,
+                        salePrice: item.pricing?.salePrice || item.salePrice,
+                        regularPrice: item.pricing?.regularPrice || item.regularPrice,
+                        quantity: 1,
+                        type: "Ebook Single"
+                    };
+                } else if (type === "combo") {
+                    cartItem = {
+                        id: `combo-${Date.now()}`,
+                        title: `Custom Combo (${item.products.length} Ebooks)`,
+                        cover: item.products[0]?.coverImage?.source,
+                        salePrice: item.salePrice,
+                        regularPrice: item.regularPrice,
+                        quantity: 1,
+                        type: "Custom Combo",
+                        items: item.products.map(p => p.title)
+                    };
+                } else if (type === "bundle") {
+                    cartItem = {
+                        id: item.id,
+                        title: item.title,
+                        cover: item.image,
+                        salePrice: item.salePrice,
+                        regularPrice: item.regularPrice,
+                        quantity: 1,
+                        type: "Curated Bundle"
+                    };
+                }
+
+                setCart(prev => {
+                    const existingIndex = prev.findIndex(ci => ci.id === cartItem.id);
+                    if (existingIndex > -1) {
+                        const updated = [...prev];
+                        updated[existingIndex].quantity += 1;
+                        return updated;
+                    }
+                    return [...prev, cartItem];
+                });
+
+                showToast(`"${cartItem.title}" Cart मा थपियो!`);
+            };
+
+            const removeFromCart = (id) => {
+                setCart(prev => prev.filter(item => item.id !== id));
+            };
+
+            const updateCartQuantity = (id, delta) => {
+                setCart(prev => prev.map(item => {
+                    if (item.id === id) {
+                        const newQ = item.quantity + delta;
+                        return newQ > 0 ? { ...item, quantity: newQ } : item;
+                    }
+                    return item;
+                }));
+            };
+
+            const cartTotals = useMemo(() => {
+                const subtotal = cart.reduce((acc, item) => acc + (item.regularPrice * item.quantity), 0);
+                const finalTotal = cart.reduce((acc, item) => acc + (item.salePrice * item.quantity), 0);
+                const savings = subtotal - finalTotal;
+                const count = cart.reduce((acc, item) => acc + item.quantity, 0);
+                return { subtotal, finalTotal, savings, count };
+            }, [cart]);
+
+            // COMBO COMPUTATION
+            const comboCalculation = useMemo(() => {
+                const selectedObjs = products.filter(p => comboSelectedIds.includes(p.id));
+                const regTotal = selectedObjs.reduce((acc, p) => acc + (p.pricing?.regularPrice || p.regularPrice || 0), 0);
+                const saleTotal = selectedObjs.reduce((acc, p) => acc + (p.pricing?.salePrice || p.salePrice || 0), 0);
+                let bonusDiscount = 0;
+                if (selectedObjs.length >= 2) {
+                    bonusDiscount = Math.round(saleTotal * 0.15);
+                }
+                const finalComboPrice = saleTotal - bonusDiscount;
+                const totalSavings = regTotal - finalComboPrice;
+
+                return {
+                    selectedObjs,
+                    regTotal,
+                    finalComboPrice,
+                    totalSavings
+                };
+            }, [comboSelectedIds, products]);
+
+            // ADMIN LOGGING & PRODUCT FORM HANDLERS
+            const handleAdminLogin = (e) => {
+                e.preventDefault();
+                if (adminPasscode === "admin123" || adminPasscode === "nsadmin") {
+                    setIsAdminAuthenticated(true);
+                    localStorage.setItem("mdns_admin_auth", "true");
+                    setAdminLoginError("");
+                    showToast("Product Manager मा स्वागत छ!");
+                } else {
+                    setAdminLoginError("गलत Passcode! (Default: admin123)");
+                }
+            };
+
+            const handleAdminLogout = () => {
+                setIsAdminAuthenticated(false);
+                localStorage.removeItem("mdns_admin_auth");
+                setIsAdminMode(false);
+                showToast("Admin Logout गरियो।");
+            };
+
+            const startAddProduct = () => {
+                setEditingProductId(null);
+                setProductForm(getEmptyProductForm());
+                setAdminActiveTab("add-product");
+            };
+
+            const startEditProduct = (prod) => {
+                setEditingProductId(prod.id);
+                setProductForm({
+                    id: prod.id,
+                    slug: prod.slug || prod.id,
+                    category: prod.category || "computer-skills",
+                    productType: prod.productType || "Single Ebook",
+                    title: prod.title || "",
+                    subtitle: prod.subtitle || "",
+                    summary: prod.summary || "",
+                    description: prod.description || "",
+                    coverImage: prod.coverImage || { type: "image", source: "https://placehold.co/600x800/0f172a/f59e0b?text=Cover" },
+                    galleryImages: prod.galleryImages || [],
+                    previewPdf: prod.previewPdf || null,
+                    pages: prod.pages || 100,
+                    chapters: prod.chapters || 10,
+                    regularPrice: prod.pricing?.regularPrice || prod.regularPrice || 499,
+                    salePrice: prod.pricing?.salePrice || prod.salePrice || 299,
+                    tags: Array.isArray(prod.tags) ? prod.tags.join(", ") : (prod.tags || ""),
+                    learningOutcomes: prod.learningOutcomes || [""],
+                    chapterOutline: prod.chapterOutline || [{ number: 1, title: "", description: "" }],
+                    headline: prod.marketing?.headline || "",
+                    hook: prod.marketing?.hook || "",
+                    offerBadge: prod.offerLabel || prod.marketing?.offerBadge || "SPECIAL OFFER",
+                    urgencyText: prod.urgencyLabel || prod.marketing?.urgencyText || "Limited Copies",
+                    ctaText: prod.marketing?.ctaText || "Get Ebook",
+                    bonuses: prod.bonuses || [],
+                    faqs: prod.faqs || [],
+                    status: prod.status || (prod.isPublished ? "Published" : "Draft"),
+                    isFeatured: !!prod.isFeatured,
+                    isNew: !!prod.isNew
+                });
+                setAdminActiveTab("add-product");
+            };
+
+            const handleSaveProduct = (e) => {
+                e.preventDefault();
+                if (!productForm.title.trim()) {
+                    showToast("⚠️ Title अनिवार्य छ!");
+                    return;
+                }
+
+                const formattedTags = typeof productForm.tags === "string" 
+                    ? productForm.tags.split(",").map(t => t.trim()).filter(Boolean)
+                    : productForm.tags;
+
+                const newObj = {
+                    id: editingProductId || `eb-${Date.now().toString().slice(-4)}`,
+                    slug: productForm.slug || productForm.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+                    category: productForm.category,
+                    productType: productForm.productType,
+                    title: productForm.title,
+                    subtitle: productForm.subtitle,
+                    summary: productForm.summary || productForm.subtitle,
+                    description: productForm.description,
+                    coverImage: productForm.coverImage,
+                    galleryImages: productForm.galleryImages,
+                    previewPdf: productForm.previewPdf,
+                    pages: Number(productForm.pages),
+                    chapters: Number(productForm.chapters),
+                    pricing: {
+                        regularPrice: Number(productForm.regularPrice),
+                        salePrice: Number(productForm.salePrice)
+                    },
+                    regularPrice: Number(productForm.regularPrice),
+                    salePrice: Number(productForm.salePrice),
+                    tags: formattedTags,
+                    learningOutcomes: productForm.learningOutcomes.filter(l => l.trim() !== ""),
+                    chapterOutline: productForm.chapterOutline,
+                    marketing: {
+                        headline: productForm.headline,
+                        hook: productForm.hook,
+                        offerBadge: productForm.offerBadge,
+                        urgencyText: productForm.urgencyText,
+                        ctaText: productForm.ctaText
+                    },
+                    offerLabel: productForm.offerBadge,
+                    urgencyLabel: productForm.urgencyText,
+                    rating: 4.9,
+                    reviewCount: 10,
+                    soldCopies: 50,
+                    status: productForm.status,
+                    isFeatured: productForm.isFeatured,
+                    isNew: productForm.isNew,
+                    isPublished: productForm.status === "Published",
+                    updatedAt: new Date().toISOString().split('T')[0]
+                };
+
+                if (editingProductId) {
+                    setProducts(prev => prev.map(p => p.id === editingProductId ? newObj : p));
+                    showToast("✓ Ebook Successfully Updated!");
+                } else {
+                    setProducts(prev => [newObj, ...prev]);
+                    showToast("✓ New Ebook Created & Published!");
+                }
+
+                setAdminActiveTab("products");
+            };
+
+            const toggleProductStatus = (id, currentStatus) => {
+                const nextStatus = currentStatus === "Published" ? "Hidden" : "Published";
+                setProducts(prev => prev.map(p => {
+                    if (p.id === id) {
+                        return { ...p, status: nextStatus, isPublished: nextStatus === "Published" };
+                    }
+                    return p;
+                }));
+                showToast(`Product status changed to ${nextStatus}`);
+            };
+
+            const handleFileUpload = (e, targetField) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const fileUrl = URL.createObjectURL(file);
+
+                if (targetField === "cover") {
+                    setProductForm(prev => ({
+                        ...prev,
+                        coverImage: { type: "image", source: fileUrl, name: file.name }
+                    }));
+                    showToast("Cover Image Uploaded!");
+                } else if (targetField === "previewPdf") {
+                    setProductForm(prev => ({
+                        ...prev,
+                        previewPdf: { type: "pdf", source: fileUrl, name: file.name }
+                    }));
+                    showToast("Preview PDF Uploaded!");
+                }
+            };
+
+            return (
+                <div className="min-h-screen flex flex-col relative">
+                    {/* TOAST NOTIFICATION */}
+                    {toastMessage && (
+                        <div className="fixed top-5 right-5 z-50 bg-slate-900 text-amber-400 px-5 py-3 rounded-lg shadow-2xl border border-amber-500/30 flex items-center space-x-2 animate-bounce">
+                            <span className="text-emerald-400 font-bold">✓</span>
+                            <span className="font-semibold text-sm">{toastMessage}</span>
+                        </div>
+                    )}
+
+                    {/* 1. TOP COMPACT STICKY FLASH SALE BAR */}
+                    <div className="bg-slate-950 text-amber-400 border-b border-amber-500/30 py-1.5 px-2 text-xs font-semibold sticky top-0 z-40 overflow-hidden select-none">
+                        <div className="max-w-7xl mx-auto flex items-center justify-between">
+                            <div className="flex items-center space-x-2 overflow-hidden w-full">
+                                <div className="shrink-0 bg-amber-500 text-slate-950 font-black px-2.5 py-0.5 rounded text-[10px] uppercase tracking-wider z-10 shadow-sm flex items-center space-x-1 mr-2">
+                                    <span>⚡ OFFERS</span>
+                                </div>
+                                
+                                <div className="overflow-hidden relative w-full flex items-center">
+                                    <div className="animate-marquee whitespace-nowrap flex items-center space-x-8">
+                                        {[...flashAnnouncements, ...flashAnnouncements].map((ann, idx) => (
+                                            <span 
+                                                key={idx} 
+                                                onClick={() => handleAnnouncementClick(ann)}
+                                                className="inline-flex items-center space-x-1 text-slate-200 hover:text-amber-300 transition cursor-pointer hover:underline text-xs"
+                                            >
+                                                <span>{ann.text}</span>
+                                                <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-1.5 py-0.2 rounded ml-1 font-bold">हेर्नुहोस् ➔</span>
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Quick Admin Toggle */}
+                            <button 
+                                onClick={() => setIsAdminMode(!isAdminMode)} 
+                                className="shrink-0 ml-3 bg-slate-800 hover:bg-amber-600 hover:text-slate-950 text-amber-400 px-2 py-0.5 rounded text-[10px] font-bold border border-amber-500/30 transition"
+                            >
+                                {isAdminMode ? "✕ Exit Admin" : "⚙️ Product Manager"}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* 2. STICKY HEADER */}
+                    <header className="bg-white/95 backdrop-blur-md sticky top-[29px] z-30 border-b border-amber-200/80 shadow-sm">
+                        <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between">
+                            <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => scrollToSection('hero')}>
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-slate-950 font-black text-xl shadow-md border border-amber-300 shrink-0 group-hover:scale-105 transition-transform">
+                                    MD
+                                </div>
+                                <div className="flex flex-col justify-center">
+                                    <h1 className="font-extrabold text-base md:text-lg text-slate-900 leading-tight tracking-tight">
+                                        {BRAND_CONFIG.storeName}
+                                    </h1>
+                                    <p className="text-[8px] md:text-xs text-amber-700 font-bold leading-none mt-0.5">
+                                        {BRAND_CONFIG.tagline}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center space-x-2 md:space-x-3">
+                                {!isAdminMode && (
+                                    <>
+                                        <button 
+                                            onClick={() => setIsCartOpen(true)}
+                                            className="relative p-2.5 rounded-xl bg-slate-100 hover:bg-amber-100 text-slate-800 transition flex items-center justify-center border border-slate-200/60"
+                                            aria-label="Shopping Cart"
+                                            title="Shopping Cart"
+                                        >
+                                            <span className="text-lg leading-none">🛒</span>
+                                            {cartTotals.count > 0 && (
+                                                <span className="absolute -top-1.5 -right-1.5 bg-amber-600 text-white font-black text-[10px] w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+                                                    {cartTotals.count}
+                                                </span>
+                                            )}
+                                        </button>
+
+                                        <button 
+                                            onClick={() => scrollToSection('bundles')}
+                                            className="px-2 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs shadow-sm transition flex items-center space-x-1 shrink-0"
+                                        >
+                                            <span>🔥 BEST TODAY</span>
+                                        </button>
+                                    </>
+                                )}
+
+                                {isAdminMode && (
+                                    <span className="text-xs font-black bg-amber-500 text-slate-950 px-2.5 py-1 rounded-lg">
+                                        ADMIN MODE ACTIVE
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* MAIN VIEW CONDITIONAL SWITCH: ADMIN PANEL VS PUBLIC STORE */}
+                    {isAdminMode ? (
+                        /* ========================================================================= */
+                        /* =========================== ADMIN MANAGER UI ============================ */
+                        /* ========================================================================= */
+                        <div className="bg-slate-100 min-h-[85vh] pb-12 flex-grow">
+                            {!isAdminAuthenticated ? (
+                                /* LOGIN SCREEN */
+                                <div className="max-w-md mx-auto mt-16 p-6 bg-white rounded-2xl border-2 border-amber-300 shadow-xl space-y-4">
+                                    <div className="text-center space-y-1">
+                                        <div className="w-12 h-12 rounded-2xl bg-amber-500 text-slate-950 font-black text-2xl flex items-center justify-center mx-auto shadow-md">
+                                            MD
+                                        </div>
+                                        <h2 className="text-xl font-black text-slate-900 mt-2">MD. NS PRODUCT MANAGER</h2>
+                                        <p className="text-xs text-slate-500">कृपया एडमिन लगइन गर्नुहोस् (Default Passcode: admin123)</p>
+                                    </div>
+
+                                    <form onSubmit={handleAdminLogin} className="space-y-4 pt-2">
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-700 mb-1">Admin Passcode</label>
+                                            <input 
+                                                type="password" 
+                                                value={adminPasscode}
+                                                onChange={(e) => setAdminPasscode(e.target.value)}
+                                                placeholder="Enter admin passcode..."
+                                                className="w-full px-4 py-2.5 rounded-xl border-2 border-slate-200 focus:border-amber-500 focus:outline-none text-sm"
+                                            />
+                                        </div>
+
+                                        {adminLoginError && (
+                                            <p className="text-xs text-red-600 font-bold bg-red-50 p-2 rounded border border-red-200">
+                                                {adminLoginError}
+                                            </p>
+                                        )}
+
+                                        <button 
+                                            type="submit" 
+                                            className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs uppercase tracking-wider rounded-xl shadow transition"
+                                        >
+                                            LOGIN TO MANAGER ➔
+                                        </button>
+                                    </form>
+                                </div>
+                            ) : (
+                                /* AUTHENTICATED ADMIN DASHBOARD & EDITORS */
+                                <div className="max-w-7xl mx-auto px-4 py-6">
+                                    {/* Admin Top Navigation */}
+                                    <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm mb-6 flex flex-wrap items-center justify-between gap-3">
+                                        <div className="flex items-center space-x-1 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
+                                            {[
+                                                { id: "dashboard", label: "Dashboard", icon: "📊" },
+                                                { id: "products", label: "Products", icon: "📚" },
+                                                { id: "add-product", label: editingProductId ? "Edit Product" : "+ Add Product", icon: "➕" },
+                                                { id: "offers", label: "Offers", icon: "🏷️" },
+                                                { id: "media", label: "Media Library", icon: "🖼️" },
+                                                { id: "settings", label: "Settings", icon: "⚙️" }
+                                            ].map((tab) => (
+                                                <button 
+                                                    key={tab.id}
+                                                    onClick={() => setAdminActiveTab(tab.id)}
+                                                    className={`px-3 py-2 rounded-xl text-xs font-extrabold transition shrink-0 flex items-center space-x-1.5 ${adminActiveTab === tab.id ? "bg-amber-500 text-slate-950 shadow-sm" : "text-slate-600 hover:bg-slate-100"}`}
+                                                >
+                                                    <span>{tab.icon}</span>
+                                                    <span>{tab.label}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+
+                                        <div className="flex items-center space-x-2 ml-auto">
+                                            <button 
+                                                onClick={() => setIsAdminMode(false)} 
+                                                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-300"
+                                            >
+                                                👁️ View Store
+                                            </button>
+                                            <button 
+                                                onClick={handleAdminLogout} 
+                                                className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold rounded-xl"
+                                            >
+                                                Logout
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* TAB 1: DASHBOARD */}
+                                    {adminActiveTab === "dashboard" && (
+                                        <div className="space-y-6">
+                                            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                                <div>
+                                                    <h2 className="text-xl font-extrabold text-slate-900">MD. NS PRODUCT MANAGER</h2>
+                                                    <p className="text-xs text-slate-500 mt-1">तपाईंको Ebook Library, Pricing र Content प्रबन्ध गर्ने मोबाइल-फ्रेन्ली प्यानल।</p>
+                                                </div>
+                                                <button 
+                                                    onClick={startAddProduct}
+                                                    className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl shadow transition"
+                                                >
+                                                    + ADD NEW PRODUCT
+                                                </button>
+                                            </div>
+
+                                            {/* Summary Cards */}
+                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                                                    <span className="text-xs text-slate-500 font-bold">Total Products</span>
+                                                    <p className="text-2xl font-black text-slate-900 mt-1">{products.length}</p>
+                                                </div>
+                                                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                                                    <span className="text-xs text-emerald-600 font-bold">Published</span>
+                                                    <p className="text-2xl font-black text-emerald-700 mt-1">{products.filter(p => p.status === "Published").length}</p>
+                                                </div>
+                                                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                                                    <span className="text-xs text-amber-600 font-bold">Drafts</span>
+                                                    <p className="text-2xl font-black text-amber-700 mt-1">{products.filter(p => p.status === "Draft").length}</p>
+                                                </div>
+                                                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                                                    <span className="text-xs text-slate-400 font-bold">Hidden / Archived</span>
+                                                    <p className="text-2xl font-black text-slate-600 mt-1">{products.filter(p => p.status === "Hidden" || p.status === "Archived").length}</p>
+                                                </div>
+                                            </div>
+
+                                            {/* Quick Product List */}
+                                            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                                                <h3 className="font-extrabold text-sm text-slate-900">Recent Products</h3>
+                                                <div className="space-y-3">
+                                                    {products.map(p => (
+                                                        <div key={p.id} className="p-3 rounded-xl border border-slate-200 hover:border-amber-400 flex items-center justify-between gap-3 bg-slate-50/50">
+                                                            <div className="flex items-center space-x-3 overflow-hidden">
+                                                                <img src={p.coverImage?.source} alt="" className="w-10 h-14 object-cover rounded shadow shrink-0" />
+                                                                <div className="truncate">
+                                                                    <h4 className="font-extrabold text-xs text-slate-900 truncate">{p.title}</h4>
+                                                                    <p className="text-[10px] text-slate-500 truncate">{p.category} • NPR {p.pricing?.salePrice || p.salePrice}</p>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="flex items-center space-x-2 shrink-0">
+                                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${p.status === "Published" ? "bg-emerald-100 text-emerald-800" : "bg-slate-200 text-slate-700"}`}>
+                                                                    {p.status || "Published"}
+                                                                </span>
+                                                                <button 
+                                                                    onClick={() => startEditProduct(p)}
+                                                                    className="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold rounded-lg"
+                                                                >
+                                                                    Edit
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* TAB 2: PRODUCTS LIST */}
+                                    {adminActiveTab === "products" && (
+                                        <div className="space-y-4">
+                                            <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200">
+                                                <h3 className="font-extrabold text-base text-slate-900">All Products ({products.length})</h3>
+                                                <button 
+                                                    onClick={startAddProduct}
+                                                    className="px-4 py-2 bg-amber-500 text-slate-950 font-bold text-xs rounded-xl"
+                                                >
+                                                    + Add Product
+                                                </button>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                {products.map(p => (
+                                                    <div key={p.id} className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-3">
+                                                        <div className="flex space-x-3">
+                                                            <img src={p.coverImage?.source} alt="" className="w-16 h-22 object-cover rounded-xl border border-amber-200 shrink-0" />
+                                                            <div className="space-y-1">
+                                                                <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded uppercase">
+                                                                    {p.category}
+                                                                </span>
+                                                                <h4 className="font-extrabold text-xs text-slate-900 leading-snug line-clamp-2">{p.title}</h4>
+                                                                <div className="text-xs">
+                                                                    <span className="font-black text-amber-700">रु. {p.pricing?.salePrice || p.salePrice}</span>
+                                                                    <span className="ml-1 text-[10px] text-slate-400 line-through">रु. {p.pricing?.regularPrice || p.regularPrice}</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+                                                            <button 
+                                                                onClick={() => toggleProductStatus(p.id, p.status || "Published")}
+                                                                className={`text-[10px] font-bold px-2.5 py-1 rounded-lg ${p.status === "Published" ? "bg-emerald-100 text-emerald-800" : "bg-slate-200 text-slate-700"}`}
+                                                            >
+                                                                {p.status === "Published" ? "✓ Published" : "✕ Hidden"}
+                                                            </button>
+
+                                                            <div className="flex space-x-2">
+                                                                <button 
+                                                                    onClick={() => { setActiveModalProduct(p); setIsAdminMode(false); }}
+                                                                    className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg"
+                                                                >
+                                                                    Preview
+                                                                </button>
+                                                                <button 
+                                                                    onClick={() => startEditProduct(p)}
+                                                                    className="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold rounded-lg"
+                                                                >
+                                                                    Edit
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* TAB 3: ADD / EDIT PRODUCT FORM */}
+                                    {adminActiveTab === "add-product" && (
+                                        <form onSubmit={handleSaveProduct} className="bg-white p-6 rounded-2xl border-2 border-amber-300 shadow-md space-y-6 max-w-4xl mx-auto">
+                                            <div className="flex justify-between items-center border-b pb-4">
+                                                <h3 className="font-black text-lg text-slate-900">
+                                                    {editingProductId ? "✏️ Edit Product Information" : "➕ Add New Product"}
+                                                </h3>
+                                                <span className="text-xs text-amber-800 font-bold bg-amber-100 px-3 py-1 rounded-full">
+                                                    Mobile-First Manager
+                                                </span>
+                                            </div>
+
+                                            {/* SECTION 1 — BASIC INFORMATION */}
+                                            <div className="space-y-4">
+                                                <h4 className="font-extrabold text-xs text-amber-800 uppercase tracking-wider border-b pb-1">SECTION 1 — BASIC INFORMATION</h4>
+                                                
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-slate-700 mb-1">Product Title *</label>
+                                                        <input 
+                                                            type="text" 
+                                                            required
+                                                            value={productForm.title}
+                                                            onChange={(e) => setProductForm(prev => ({ ...prev, title: e.target.value }))}
+                                                            placeholder="eg. Complete Computer Operator Guide"
+                                                            className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:border-amber-500 focus:outline-none"
+                                                        />
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-slate-700 mb-1">Product Category</label>
+                                                        <select 
+                                                            value={productForm.category}
+                                                            onChange={(e) => setProductForm(prev => ({ ...prev, category: e.target.value }))}
+                                                            className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white focus:border-amber-500"
+                                                        >
+                                                            {CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <label className="block text-xs font-bold text-slate-700 mb-1">Subtitle / Tagline</label>
+                                                    <input 
+                                                        type="text" 
+                                                        value={productForm.subtitle}
+                                                        onChange={(e) => setProductForm(prev => ({ ...prev, subtitle: e.target.value }))}
+                                                        placeholder="Short catchy tagline..."
+                                                        className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:border-amber-500 focus:outline-none"
+                                                    />
+                                                </div>
+
+                                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-slate-700 mb-1">Pages Count</label>
+                                                        <input 
+                                                            type="number" 
+                                                            value={productForm.pages}
+                                                            onChange={(e) => setProductForm(prev => ({ ...prev, pages: e.target.value }))}
+                                                            className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-slate-700 mb-1">Chapters Count</label>
+                                                        <input 
+                                                            type="number" 
+                                                            value={productForm.chapters}
+                                                            onChange={(e) => setProductForm(prev => ({ ...prev, chapters: e.target.value }))}
+                                                            className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-slate-700 mb-1">Status</label>
+                                                        <select 
+                                                            value={productForm.status}
+                                                            onChange={(e) => setProductForm(prev => ({ ...prev, status: e.target.value }))}
+                                                            className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white"
+                                                        >
+                                                            <option value="Published">Published</option>
+                                                            <option value="Draft">Draft</option>
+                                                            <option value="Hidden">Hidden</option>
+                                                            <option value="Archived">Archived</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-slate-700 mb-1">Product Type</label>
+                                                        <select 
+                                                            value={productForm.productType}
+                                                            onChange={(e) => setProductForm(prev => ({ ...prev, productType: e.target.value }))}
+                                                            className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white"
+                                                        >
+                                                            <option value="Single Ebook">Single Ebook</option>
+                                                            <option value="Bundle">Bundle</option>
+                                                            <option value="Combo">Combo</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* SECTION 2 — PRICING */}
+                                            <div className="space-y-4">
+                                                <h4 className="font-extrabold text-xs text-amber-800 uppercase tracking-wider border-b pb-1">SECTION 2 — PRICING & DISCOUNTS</h4>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-slate-700 mb-1">Regular Price (NPR)</label>
+                                                        <input 
+                                                            type="number" 
+                                                            value={productForm.regularPrice}
+                                                            onChange={(e) => setProductForm(prev => ({ ...prev, regularPrice: e.target.value }))}
+                                                            className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-slate-700 mb-1">Offer Sale Price (NPR)</label>
+                                                        <input 
+                                                            type="number" 
+                                                            value={productForm.salePrice}
+                                                            onChange={(e) => setProductForm(prev => ({ ...prev, salePrice: e.target.value }))}
+                                                            className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-black text-amber-700"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-800 font-bold flex justify-between">
+                                                    <span>Calculated Customer Savings:</span>
+                                                    <span>रु. {Math.max(0, productForm.regularPrice - productForm.salePrice)} Off ({Math.round(((productForm.regularPrice - productForm.salePrice)/productForm.regularPrice)*100)}% Discount)</span>
+                                                </div>
+                                            </div>
+
+                                            {/* SECTION 3 — MEDIA & PREVIEW PDF */}
+                                            <div className="space-y-4">
+                                                <h4 className="font-extrabold text-xs text-amber-800 uppercase tracking-wider border-b pb-1">SECTION 3 — MEDIA ASSETS</h4>
+                                                
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    {/* Cover Upload */}
+                                                    <div className="p-3 bg-slate-50 border rounded-xl space-y-2">
+                                                        <label className="block text-xs font-bold text-slate-700">Cover Image</label>
+                                                        <input 
+                                                            type="file" 
+                                                            accept="image/*"
+                                                            onChange={(e) => handleFileUpload(e, "cover")}
+                                                            className="text-xs w-full"
+                                                        />
+                                                        {productForm.coverImage?.source && (
+                                                            <div className="flex items-center space-x-2 mt-2">
+                                                                <img src={productForm.coverImage.source} alt="" className="w-12 h-16 object-cover rounded shadow" />
+                                                                <span className="text-[10px] text-slate-500 truncate">Current Cover Set</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Sample Preview PDF */}
+                                                    <div className="p-3 bg-slate-50 border rounded-xl space-y-2">
+                                                        <label className="block text-xs font-bold text-slate-700">Free Sample Preview PDF (Public)</label>
+                                                        <input 
+                                                            type="file" 
+                                                            accept="application/pdf"
+                                                            onChange={(e) => handleFileUpload(e, "previewPdf")}
+                                                            className="text-xs w-full"
+                                                        />
+                                                        <p className="text-[10px] text-slate-500">
+                                                            ℹ️ यो नमुना अध्याय (Sample Preview) को लागि मात्र हो। Original Paid PDF यहाँ नराख्नुहोस्।
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* SECTION 4 — DESCRIPTION & DETAILS */}
+                                            <div className="space-y-4">
+                                                <h4 className="font-extrabold text-xs text-amber-800 uppercase tracking-wider border-b pb-1">SECTION 4 — DESCRIPTION & DETAILS</h4>
+                                                
+                                                <div>
+                                                    <label className="block text-xs font-bold text-slate-700 mb-1">Full Description</label>
+                                                    <textarea 
+                                                        rows="3"
+                                                        value={productForm.description}
+                                                        onChange={(e) => setProductForm(prev => ({ ...prev, description: e.target.value }))}
+                                                        className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:border-amber-500"
+                                                    ></textarea>
+                                                </div>
+
+                                                <div>
+                                                    <label className="block text-xs font-bold text-slate-700 mb-1">Tags (Comma separated)</label>
+                                                    <input 
+                                                        type="text" 
+                                                        value={productForm.tags}
+                                                        onChange={(e) => setProductForm(prev => ({ ...prev, tags: e.target.value }))}
+                                                        placeholder="eg. Computer Skills, MS Office, Typing"
+                                                        className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* SECTION 5 — MARKETING HIGHLIGHTS */}
+                                            <div className="space-y-4">
+                                                <h4 className="font-extrabold text-xs text-amber-800 uppercase tracking-wider border-b pb-1">SECTION 5 — MARKETING BADGES</h4>
+                                                
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-slate-700 mb-1">Offer Badge Label</label>
+                                                        <input 
+                                                            type="text" 
+                                                            value={productForm.offerBadge}
+                                                            onChange={(e) => setProductForm(prev => ({ ...prev, offerBadge: e.target.value }))}
+                                                            placeholder="eg. BESTSELLER 50% OFF"
+                                                            className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-slate-700 mb-1">Urgency Label</label>
+                                                        <input 
+                                                            type="text" 
+                                                            value={productForm.urgencyText}
+                                                            onChange={(e) => setProductForm(prev => ({ ...prev, urgencyText: e.target.value }))}
+                                                            placeholder="eg. Limited Copies Offer"
+                                                            className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* SAVE BUTTONS */}
+                                            <div className="pt-4 border-t border-slate-200 flex items-center justify-end space-x-3">
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => setAdminActiveTab("products")}
+                                                    className="px-4 py-2.5 bg-slate-100 text-slate-700 font-bold text-xs rounded-xl"
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button 
+                                                    type="submit" 
+                                                    className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl shadow-md transition"
+                                                >
+                                                    Save & Publish Product ➔
+                                                </button>
+                                            </div>
+                                        </form>
+                                    )}
+
+                                    {/* TAB 4: OFFERS MANAGER */}
+                                    {adminActiveTab === "offers" && (
+                                        <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4">
+                                            <h3 className="font-extrabold text-base text-slate-900">Active Special Offers</h3>
+                                            <div className="space-y-3">
+                                                {products.map(p => (
+                                                    <div key={p.id} className="p-3 bg-amber-50/50 rounded-xl border border-amber-200 flex items-center justify-between">
+                                                        <div>
+                                                            <h4 className="font-bold text-xs text-slate-900">{p.title}</h4>
+                                                            <p className="text-[11px] text-amber-800 font-semibold">{p.offerLabel || "SPECIAL OFFER"} — NPR {p.pricing?.salePrice || p.salePrice}</p>
+                                                        </div>
+                                                        <button onClick={() => startEditProduct(p)} className="px-3 py-1 bg-amber-500 text-slate-950 text-xs font-bold rounded-lg">
+                                                            Edit Pricing
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* TAB 5: MEDIA LIBRARY */}
+                                    {adminActiveTab === "media" && (
+                                        <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4">
+                                            <h3 className="font-extrabold text-base text-slate-900">Public Asset Library</h3>
+                                            <p className="text-xs text-slate-500">सबै Public Ebook Cover Image र Preview Sample PDFs को सूची:</p>
+                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                {products.map(p => (
+                                                    <div key={p.id} className="p-3 bg-slate-50 border rounded-xl space-y-2">
+                                                        <img src={p.coverImage?.source} alt="" className="w-full h-32 object-cover rounded" />
+                                                        <p className="text-[10px] font-bold text-slate-800 truncate">{p.title}</p>
+                                                        <span className="text-[9px] text-slate-400 block">Public Cover Asset</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* TAB 6: SETTINGS */}
+                                    {adminActiveTab === "settings" && (
+                                        <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4 max-w-xl">
+                                            <h3 className="font-extrabold text-base text-slate-900">Store Settings</h3>
+                                            <div className="space-y-3 text-xs">
+                                                <div>
+                                                    <label className="block font-bold text-slate-700 mb-1">Store Name</label>
+                                                    <input type="text" readOnly value={BRAND_CONFIG.storeName} className="w-full p-2 bg-slate-100 border rounded text-slate-600" />
+                                                </div>
+                                                <div>
+                                                    <label className="block font-bold text-slate-700 mb-1">WhatsApp Support Number</label>
+                                                    <input type="text" readOnly value={BRAND_CONFIG.whatsappNumber} className="w-full p-2 bg-slate-100 border rounded text-slate-600" />
+                                                </div>
+                                                <div>
+                                                    <label className="block font-bold text-slate-700 mb-1">Support Email</label>
+                                                    <input type="text" readOnly value={BRAND_CONFIG.supportEmail} className="w-full p-2 bg-slate-100 border rounded text-slate-600" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        /* ========================================================================= */
+                        /* ======================== PUBLIC ECOMMERCE STORE ========================= */
+                        /* ========================================================================= */
+                        <main className="flex-grow">
+                            {/* 3. HERO SECTION */}
+                            <section id="hero" className="bg-gradient-to-b from-amber-50/70 via-amber-50/30 to-white py-10 md:py-16 border-b border-amber-200/50">
+                                <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+                                    {/* Left Mockup */}
+                                    <div className="md:col-span-5 flex justify-center">
+                                        <div className="relative group max-w-xs md:max-w-sm w-full">
+                                            <div className="absolute -inset-1 bg-gradient-to-r from-amber-400 to-amber-600 rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-500"></div>
+                                            <div className="relative bg-white p-3 rounded-2xl border-2 border-amber-300 shadow-xl">
+                                                <img 
+                                                    src={products[0]?.coverImage?.source || "https://placehold.co/600x800/0f172a/f59e0b?text=Featured+Ebook"} 
+                                                    alt={products[0]?.title} 
+                                                    className="w-full h-auto rounded-xl shadow-md object-cover cursor-pointer"
+                                                    onClick={() => setPreviewImageAsset(products[0]?.coverImage?.source)}
+                                                />
+                                                <div className="mt-3 flex items-center justify-between text-xs px-1 text-slate-600 font-semibold">
+                                                    <span>📄 {products[0]?.pages} Pages</span>
+                                                    <span>📚 {products[0]?.chapters} Chapters</span>
+                                                    <span className="text-amber-700 bg-amber-100 px-2 py-0.5 rounded font-bold">⭐ {products[0]?.rating} ({products[0]?.reviewCount})</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Right Featured Details */}
+                                    <div className="md:col-span-7 space-y-4">
+                                        <div className="inline-flex items-center space-x-2 bg-amber-100 border border-amber-300 text-amber-900 px-3 py-1 rounded-full text-xs font-bold">
+                                            <span>🌟 MD. NS FEATURED LEARNING RESOURCE</span>
+                                        </div>
+
+                                        <h2 className="text-2xl md:text-4xl font-extrabold text-slate-900 leading-tight">
+                                            आफ्नो Skill, Knowledge र Career Growth का लागि सही Ebook छान्नुहोस्
+                                        </h2>
+
+                                        <p className="text-slate-600 text-sm md:text-base leading-relaxed">
+                                            Practical Learning Resources जसले तपाईंलाई Computer Skills, Digital Skills, Exam Preparation, Share Market Fundamentals, Personality Development र Career Planning मा अगाडि बढ्न सहयोग गर्छ।
+                                        </p>
+
+                                        {/* Price Box */}
+                                        <div className="p-4 rounded-xl bg-amber-50/80 border border-amber-200 flex flex-wrap items-center justify-between gap-4">
+                                            <div>
+                                                <div className="flex items-baseline space-x-3">
+                                                    <span className="text-3xl font-extrabold text-amber-700">रु. {products[0]?.pricing?.salePrice || products[0]?.salePrice}</span>
+                                                    <span className="text-sm font-medium text-slate-400 line-through">रु. {products[0]?.pricing?.regularPrice || products[0]?.regularPrice}</span>
+                                                    <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-0.5 rounded">
+                                                        बचत रु. {(products[0]?.pricing?.regularPrice || products[0]?.regularPrice) - (products[0]?.pricing?.salePrice || products[0]?.salePrice)}
+                                                    </span>
+                                                </div>
+                                                <p className="text-xs text-slate-500 mt-1">
+                                                    ✅ instant sample preview & 3-5m WhatsApp/Email Delivery
+                                                </p>
+                                            </div>
+
+                                            <div className="flex items-center space-x-2 w-full sm:w-auto">
+                                                <button 
+                                                    onClick={() => setActiveModalProduct(products[0])}
+                                                    className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl border border-amber-400 text-amber-900 bg-white hover:bg-amber-50 font-bold text-xs transition"
+                                                >
+                                                    Preview हेर्नुहोस्
+                                                </button>
+                                                <button 
+                                                    onClick={() => addToCart(products[0], "single")}
+                                                    className="flex-1 sm:flex-none px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs shadow-md transition"
+                                                >
+                                                    Cart मा थप्नुहोस् 🛒
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* 4. TRUST STRIP */}
+                            <section className="bg-slate-50 border-b border-slate-200 py-6">
+                                <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div className="p-3 rounded-xl bg-white border border-slate-200 flex items-center space-x-3">
+                                        <div className="w-10 h-10 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-lg font-bold shrink-0">📖</div>
+                                        <div>
+                                            <h4 className="font-bold text-xs md:text-sm text-slate-900">Practical Learning</h4>
+                                            <p className="text-[11px] text-slate-500">उपयोगी र व्यवस्थित Content</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-3 rounded-xl bg-white border border-slate-200 flex items-center space-x-3">
+                                        <div className="w-10 h-10 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-lg font-bold shrink-0">💳</div>
+                                        <div>
+                                            <h4 className="font-bold text-xs md:text-sm text-slate-900">NSPAY Payment</h4>
+                                            <p className="text-[11px] text-slate-500">सुरक्षित Payment Page</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-3 rounded-xl bg-white border border-slate-200 flex items-center space-x-3">
+                                        <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg font-bold shrink-0">⚡</div>
+                                        <div>
+                                            <h4 className="font-bold text-xs md:text-sm text-slate-900">3–5m Delivery</h4>
+                                            <p className="text-[11px] text-slate-500">WhatsApp / Email delivery</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-3 rounded-xl bg-white border border-slate-200 flex items-center space-x-3">
+                                        <div className="w-10 h-10 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center text-lg font-bold shrink-0">💬</div>
+                                        <div>
+                                            <h4 className="font-bold text-xs md:text-sm text-slate-900">Direct Support</h4>
+                                            <p className="text-[11px] text-slate-500">WhatsApp +977 9702784684</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* 5. GOALS SECTION */}
+                            <section className="py-12 bg-white border-b border-amber-200/40">
+                                <div className="max-w-7xl mx-auto px-4">
+                                    <div className="text-center max-w-2xl mx-auto mb-8">
+                                        <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900">
+                                            तपाईंको Goal के हो?
+                                        </h2>
+                                        <p className="text-slate-600 text-sm mt-2">
+                                            आफ्नो आवश्यकता र Career Direction अनुसार सही Ebook छान्नुहोस्।
+                                        </p>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        {[
+                                            { title: "Computer Skills सिक्ने", icon: "💻", cat: "computer-skills", desc: "Word, Excel र Typing व्यवहारिक सिक्न" },
+                                            { title: "Digital Income सिक्ने", icon: "🌐", cat: "digital-skills-online-income", desc: "Freelancing र Remote Work सुरु गर्न" },
+                                            { title: "LokSewa तयारी गर्ने", icon: "📚", cat: "loksewa", desc: "GK & IQ तयारी र परीक्षा रणनीति" },
+                                            { title: "Share Market बुझ्ने", icon: "📈", cat: "share-market", desc: "IPO र NEPSE Fundamental सिक्न" },
+                                            { title: "Interview मा सफल हुने", icon: "🗣️", cat: "personality-development", desc: "बोल्ने कला र आत्मविश्वास बढाउन" },
+                                            { title: "Job Ready हुने", icon: "🎯", cat: "nepali-youth-career-guides", desc: "CV / Resume र Job Search रणनीतिका लागि" },
+                                            { title: "Career Path स्पष्ट पार्ने", icon: "🗺️", cat: "nepali-youth-career-guides", desc: "नेपालमै अवसर खोज्ने बाटो भेट्टाउन" },
+                                            { title: "Personal Growth बढाउने", icon: "✨", cat: "personality-development", desc: "निरन्तर सिकाइ र क्षमता बढाउन" }
+                                        ].map((goal, idx) => (
+                                            <div 
+                                                key={idx} 
+                                                onClick={() => { setSelectedCategory(goal.cat); scrollToSection('explore'); }}
+                                                className="p-4 rounded-xl bg-amber-50/50 hover:bg-amber-100/60 border border-amber-200 cursor-pointer transition group"
+                                            >
+                                                <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">{goal.icon}</div>
+                                                <h3 className="font-bold text-sm text-slate-900">{goal.title}</h3>
+                                                <p className="text-xs text-slate-500 mt-1">{goal.desc}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* 6. TRANSFORMATION STEPS */}
+                            <section className="py-12 bg-amber-50/40 border-b border-amber-200/50">
+                                <div className="max-w-7xl mx-auto px-4">
+                                    <div className="text-center max-w-2xl mx-auto mb-10">
+                                        <span className="text-amber-700 font-bold text-xs uppercase tracking-wider">LEARNING PATHWAY</span>
+                                        <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 mt-1">
+                                            Ebook बाट सिक्ने र प्रगति गर्ने ६ चरणहरू
+                                        </h2>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+                                        {[
+                                            { step: "1", title: "Goal पहिचान", desc: "आफ्नो आवश्यकता बुझ्नुहोस्" },
+                                            { step: "2", title: "Ebook छनोट", desc: "सही शीर्षक वा Combo रोज्नुहोस्" },
+                                            { step: "3", title: "Sample Preview", desc: "अध्यायी विषयवस्तु पहिले हेर्नुहोस्" },
+                                            { step: "4", title: "Practical Study", desc: "मुख्य Concepts र Rules सिक्नुहोस्" },
+                                            { step: "5", title: "निरन्तर अभ्यास", desc: "सिकेका कुरा व्यवहारमा उतार्नुहोस्" },
+                                            { step: "6", title: "Skills Growth", desc: "आफ्नो Skill र Confidence बढाउनुहोस्" }
+                                        ].map((s, idx) => (
+                                            <div key={idx} className="bg-white p-4 rounded-xl border border-amber-200 text-center relative">
+                                                <div className="w-8 h-8 rounded-full bg-amber-500 text-slate-950 font-black text-sm flex items-center justify-center mx-auto mb-2 shadow-sm">
+                                                    {s.step}
+                                                </div>
+                                                <h4 className="font-bold text-xs md:text-sm text-slate-900">{s.title}</h4>
+                                                <p className="text-[11px] text-slate-500 mt-1">{s.desc}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* 7. EXPLORE LIBRARY SECTION */}
+                            <section id="explore" className="py-12 bg-white border-b border-amber-200/60">
+                                <div className="max-w-7xl mx-auto px-4">
+                                    <div className="flex flex-col md:flex-row md:items-end justify-between mb-8">
+                                        <div>
+                                            <span className="text-amber-700 font-bold text-xs uppercase tracking-wider">MD. NS DIGITAL LIBRARY</span>
+                                            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 mt-1">
+                                                Explore Ebook Library
+                                            </h2>
+                                            <p className="text-slate-600 text-xs md:text-sm mt-1">
+                                                आफ्नो आवश्यकता अनुसार Ebook खोज्नुहोस्, Filter गर्नुहोस् र Preview हेरेर छान्नुहोस्।
+                                            </p>
+                                        </div>
+
+                                        {/* Sort Controls */}
+                                        <div className="mt-4 md:mt-0 flex items-center space-x-2">
+                                            <label className="text-xs font-bold text-slate-600">Sort By:</label>
+                                            <select 
+                                                value={sortBy}
+                                                onChange={(e) => setSortBy(e.target.value)}
+                                                className="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-800 bg-white focus:outline-none focus:border-amber-500"
+                                            >
+                                                <option value="featured">Featured</option>
+                                                <option value="newest">Newest Launch</option>
+                                                <option value="price-low">Price: Low to High</option>
+                                                <option value="price-high">Price: High to Low</option>
+                                                <option value="discount">Highest Discount</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    {/* Search and Categories Filter Bar */}
+                                    <div className="space-y-4 mb-8">
+                                        <div className="relative">
+                                            <input 
+                                                type="text" 
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                placeholder="Search by title, skills, tags (eg. Computer, LokSewa, NEPSE, CV)..."
+                                                className="w-full pl-10 pr-10 py-3 rounded-xl border-2 border-amber-200 focus:border-amber-500 focus:outline-none text-sm bg-amber-50/20"
+                                            />
+                                            <span className="absolute left-3.5 top-3 text-slate-400 text-base">🔍</span>
+                                            {searchQuery && (
+                                                <button 
+                                                    onClick={() => setSearchQuery("")}
+                                                    className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 text-xs font-bold"
+                                                >
+                                                    ✕ Clear
+                                                </button>
+                                            )}
+                                        </div>
+
+                                        {/* Category Pills */}
+                                        <div className="flex items-center space-x-2 overflow-x-auto pb-2 scrollbar-none">
+                                            <button 
+                                                onClick={() => setSelectedCategory("all")}
+                                                className={`px-4 py-2 rounded-xl text-xs font-bold shrink-0 transition ${selectedCategory === "all" ? "bg-amber-500 text-slate-950 shadow" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}
+                                            >
+                                                All Ebooks ({products.filter(p => p.status !== "Draft" && p.status !== "Hidden").length})
+                                            </button>
+
+                                            {CATEGORIES.map(cat => {
+                                                const count = products.filter(p => p.category === cat.id && p.status !== "Draft" && p.status !== "Hidden").length;
+                                                return (
+                                                    <button 
+                                                        key={cat.id}
+                                                        onClick={() => setSelectedCategory(cat.id)}
+                                                        className={`px-4 py-2 rounded-xl text-xs font-bold shrink-0 transition ${selectedCategory === cat.id ? "bg-amber-500 text-slate-950 shadow" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}
+                                                    >
+                                                        {cat.name} ({count})
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    {/* Product Cards Grid */}
+                                    {filteredProducts.length === 0 ? (
+                                        <div className="text-center py-12 bg-amber-50/30 rounded-2xl border border-dashed border-amber-300">
+                                            <p className="text-slate-600 font-semibold text-sm">कुनै Ebook भेटिएन।</p>
+                                            <button 
+                                                onClick={() => { setSearchQuery(""); setSelectedCategory("all"); }}
+                                                className="mt-3 px-4 py-2 bg-amber-500 text-slate-950 text-xs font-bold rounded-lg"
+                                            >
+                                                सबै Filter Reset गर्नुहोस्
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                            {filteredProducts.map(product => {
+                                                const regP = product.pricing?.regularPrice || product.regularPrice;
+                                                const saleP = product.pricing?.salePrice || product.salePrice;
+                                                return (
+                                                    <div key={product.id} className="bg-white rounded-2xl border-2 border-amber-300 shadow-sm hover:shadow-md transition flex flex-col overflow-hidden group">
+                                                        <div className="relative overflow-hidden bg-slate-900 h-52 flex items-center justify-center">
+                                                            <img 
+                                                                src={product.coverImage?.source} 
+                                                                alt={product.title} 
+                                                                className="h-full w-full object-cover group-hover:scale-105 transition duration-500"
+                                                            />
+                                                            <span className="absolute top-3 left-3 bg-amber-500 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded shadow">
+                                                                {product.offerLabel || product.marketing?.offerBadge || "SPECIAL OFFER"}
+                                                            </span>
+                                                            <span className="absolute top-3 right-3 bg-slate-900/80 backdrop-blur-sm text-amber-300 text-[10px] font-bold px-2 py-0.5 rounded border border-amber-400/30">
+                                                                ⭐ {product.rating} ({product.reviewCount})
+                                                            </span>
+                                                        </div>
+
+                                                        <div className="p-5 flex-grow flex flex-col justify-between space-y-4">
+                                                            <div>
+                                                                <div className="flex items-center space-x-2 text-[11px] text-amber-700 font-bold mb-1">
+                                                                    <span>📄 {product.pages} Pages</span>
+                                                                    <span>•</span>
+                                                                    <span>📚 {product.chapters} Chapters</span>
+                                                                </div>
+
+                                                                <h3 
+                                                                    onClick={() => setActiveModalProduct(product)}
+                                                                    className="font-extrabold text-base text-slate-900 group-hover:text-amber-600 cursor-pointer line-clamp-2 transition"
+                                                                >
+                                                                    {product.title}
+                                                                </h3>
+
+                                                                <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+                                                                    {product.subtitle}
+                                                                </p>
+                                                            </div>
+
+                                                            <div className="pt-3 border-t border-slate-100 space-y-3">
+                                                                <div className="flex items-baseline justify-between">
+                                                                    <div>
+                                                                        <span className="text-2xl font-black text-amber-700">रु. {saleP}</span>
+                                                                        <span className="ml-2 text-xs text-slate-400 line-through">रु. {regP}</span>
+                                                                    </div>
+                                                                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">
+                                                                        बचत रु. {regP - saleP}
+                                                                    </span>
+                                                                </div>
+
+                                                                <div className="grid grid-cols-2 gap-2">
+                                                                    <button 
+                                                                        onClick={() => setActiveModalProduct(product)}
+                                                                        className="px-3 py-2 rounded-xl border border-amber-300 text-amber-900 hover:bg-amber-50 font-bold text-xs text-center transition"
+                                                                    >
+                                                                        Details & Preview
+                                                                    </button>
+                                                                    <button 
+                                                                        onClick={() => addToCart(product, "single")}
+                                                                        className="px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs text-center shadow transition"
+                                                                    >
+                                                                        Cart मा थप्नुहोस्
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            </section>
+
+                            {/* 8. CUSTOM COMBO BUILDER */}
+                            <section id="combos" className="py-12 bg-amber-50/50 border-b border-amber-200/60">
+                                <div className="max-w-7xl mx-auto px-4">
+                                    <div className="text-center max-w-2xl mx-auto mb-8">
+                                        <span className="text-amber-700 font-bold text-xs uppercase tracking-wider">CUSTOM SAVINGS</span>
+                                        <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 mt-1">
+                                            आफ्नो Custom Combo बनाउनुहोस्
+                                        </h2>
+                                        <p className="text-slate-600 text-xs md:text-sm mt-1">
+                                            तपाईंलाई आवश्यक २ वा सोभन्दा बढी Ebook छान्नुहोस् र अतिरिक्त १५% Discount प्राप्त गर्नुहोस्!
+                                        </p>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                                        <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            {products.filter(p => p.status !== "Draft" && p.status !== "Hidden").map(product => {
+                                                const isChecked = comboSelectedIds.includes(product.id);
+                                                const regP = product.pricing?.regularPrice || product.regularPrice;
+                                                const saleP = product.pricing?.salePrice || product.salePrice;
+                                                return (
+                                                    <div 
+                                                        key={product.id}
+                                                        onClick={() => {
+                                                            setComboSelectedIds(prev => 
+                                                                isChecked ? prev.filter(id => id !== product.id) : [...prev, product.id]
+                                                            );
+                                                        }}
+                                                        className={`p-4 rounded-xl border-2 transition cursor-pointer flex items-start space-x-3 ${isChecked ? "bg-amber-100/80 border-amber-500 shadow-sm" : "bg-white border-amber-200 hover:border-amber-300"}`}
+                                                    >
+                                                        <input 
+                                                            type="checkbox" 
+                                                            checked={isChecked}
+                                                            onChange={() => {}}
+                                                            className="mt-1 w-4 h-4 text-amber-600 rounded focus:ring-amber-500"
+                                                        />
+                                                        <div className="flex-grow">
+                                                            <h4 className="font-extrabold text-xs md:text-sm text-slate-900 leading-snug">{product.title}</h4>
+                                                            <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-1">{product.subtitle}</p>
+                                                            <div className="mt-2 flex items-center justify-between">
+                                                                <span className="font-black text-amber-700 text-sm">रु. {saleP}</span>
+                                                                <span className="text-[10px] text-slate-400 line-through">रु. {regP}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+
+                                        <div className="lg:col-span-4 bg-white p-6 rounded-2xl border-2 border-amber-300 shadow-md h-fit">
+                                            <h3 className="font-black text-base text-slate-900 border-b border-slate-100 pb-3">
+                                                📦 Your Custom Combo Summary
+                                            </h3>
+
+                                            <div className="py-4 space-y-2 text-xs">
+                                                <div className="flex justify-between text-slate-600">
+                                                    <span>Selected Ebooks:</span>
+                                                    <span className="font-bold text-slate-900">{comboCalculation.selectedObjs.length} Ebooks</span>
+                                                </div>
+                                                <div className="flex justify-between text-slate-600">
+                                                    <span>Original Price Total:</span>
+                                                    <span className="line-through text-slate-400">रु. {comboCalculation.regTotal}</span>
+                                                </div>
+
+                                                {comboCalculation.selectedObjs.length >= 2 && (
+                                                    <div className="flex justify-between text-emerald-700 font-bold bg-emerald-50 p-2 rounded">
+                                                        <span>✨ Custom Combo Bonus:</span>
+                                                        <span>-15% Extra Off</span>
+                                                    </div>
+                                                )}
+
+                                                <div className="pt-3 border-t border-slate-200 flex justify-between items-baseline">
+                                                    <span className="font-bold text-sm text-slate-900">Final Combo Price:</span>
+                                                    <span className="text-2xl font-black text-amber-700">रु. {comboCalculation.finalComboPrice}</span>
+                                                </div>
+
+                                                {comboCalculation.totalSavings > 0 && (
+                                                    <p className="text-emerald-700 text-[11px] font-bold text-right">
+                                                        कुल बचत: रु. {comboCalculation.totalSavings}
+                                                    </p>
+                                                )}
+                                            </div>
+
+                                            <button 
+                                                disabled={comboCalculation.selectedObjs.length < 2}
+                                                onClick={() => {
+                                                    addToCart({
+                                                        products: comboCalculation.selectedObjs,
+                                                        salePrice: comboCalculation.finalComboPrice,
+                                                        regularPrice: comboCalculation.regTotal
+                                                    }, "combo");
+                                                }}
+                                                className={`w-full py-3 rounded-xl font-extrabold text-xs uppercase tracking-wider transition ${comboCalculation.selectedObjs.length >= 2 ? "bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-md" : "bg-slate-200 text-slate-400 cursor-not-allowed"}`}
+                                            >
+                                                {comboCalculation.selectedObjs.length < 2 ? "कमसेकम २ Ebooks छान्नुहोस्" : "Add Combo To Cart 🛒"}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* 9. BEST BUNDLES SECTION */}
+                            <section id="bundles" className="py-12 bg-white border-b border-amber-200/60">
+                                <div className="max-w-7xl mx-auto px-4">
+                                    <div className="text-center max-w-2xl mx-auto mb-8">
+                                        <span className="text-amber-700 font-bold text-xs uppercase tracking-wider">CURATED PACKAGES</span>
+                                        <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 mt-1">
+                                            Best Bundle Offers
+                                        </h2>
+                                        <p className="text-slate-600 text-xs md:text-sm mt-1">
+                                            आफ्नो लक्ष्यअनुसार तयार गरिएका Ebook Bundles हेर्नुहोस् र सर्वाधिक बचत गर्नुहोस्।
+                                        </p>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        {CURATED_BUNDLES.map(bundle => (
+                                            <div key={bundle.id} className="bg-gradient-to-br from-amber-50 to-white rounded-2xl border-2 border-amber-400 p-6 shadow-md flex flex-col justify-between">
+                                                <div>
+                                                    <span className="bg-amber-500 text-slate-950 font-black text-[10px] px-3 py-1 rounded-full uppercase tracking-wider">
+                                                        {bundle.badge}
+                                                    </span>
+
+                                                    <h3 className="text-xl font-black text-slate-900 mt-3">{bundle.title}</h3>
+                                                    <p className="text-xs font-semibold text-amber-800 mt-1">{bundle.subtitle}</p>
+                                                    <p className="text-xs text-slate-600 mt-2">{bundle.summary}</p>
+
+                                                    <div className="mt-4 bg-white p-3 rounded-xl border border-amber-200">
+                                                        <p className="text-[11px] font-bold text-slate-700 mb-1">समावेश Ebooks:</p>
+                                                        <ul className="text-xs text-slate-600 space-y-1">
+                                                            {bundle.includedProductIds.map(id => {
+                                                                const p = products.find(prod => prod.id === id);
+                                                                return p ? <li key={id} className="flex items-center space-x-1.5"><span>✅</span><span>{p.title}</span></li> : null;
+                                                            })}
+                                                        </ul>
+                                                    </div>
+                                                </div>
+
+                                                <div className="mt-6 pt-4 border-t border-amber-200 flex items-center justify-between">
+                                                    <div>
+                                                        <span className="text-3xl font-black text-amber-700">रु. {bundle.salePrice}</span>
+                                                        <span className="ml-2 text-xs text-slate-400 line-through">रु. {bundle.regularPrice}</span>
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => addToCart(bundle, "bundle")}
+                                                        className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs shadow transition"
+                                                    >
+                                                        Add Bundle To Cart 🛒
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* 10. HOW TO GET YOUR EBOOK SECTION */}
+                            <section id="how-it-works" className="py-12 bg-slate-900 text-white border-b border-amber-500/30">
+                                <div className="max-w-7xl mx-auto px-4">
+                                    <div className="text-center max-w-2xl mx-auto mb-10">
+                                        <span className="text-amber-400 font-bold text-xs uppercase tracking-wider">EBOOK RECEIVING PROCESS</span>
+                                        <h2 className="text-2xl md:text-3xl font-extrabold text-white mt-1">
+                                            तपाईंले Ebook कसरी प्राप्त गर्नुहुन्छ?
+                                        </h2>
+                                        <p className="text-slate-400 text-xs md:text-sm mt-1">
+                                            सरल र पारदर्शी ६ चरणहरू। Payment विवरण पुष्टि भएपछि 3–5 minutes मा Delivery!
+                                        </p>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {[
+                                            { num: "01", title: "Explore & Select", desc: "आफ्नो आवश्यकता अनुसार Ebook, Custom Combo वा Bundle छान्नुहोस्।" },
+                                            { num: "02", title: "Preview Sample", desc: "Sample Chapter Preview हेरेर सामग्री र विषयवस्तु बुझ्नुहोस्।" },
+                                            { num: "03", title: "Add To Cart", desc: "चयन गरिएका Ebooks Cart मा थप्नुहोस् र कुल रकम जाँच गर्नुहोस्।" },
+                                            { num: "04", title: "Go To NSPAY", desc: "Cart बाट 'NSPAY मा Payment गर्न जानुहोस्' क्लिक गरी Payment Page मा जानुहोस्।" },
+                                            { num: "05", title: "Payment & Details", desc: "NSPAY मा उपलब्ध eSewa/Khalti/Fonepay विवरणमा Payment गरी Screenshot पठाउनुहोस्।" },
+                                            { num: "06", title: "Fast Delivery", desc: "Payment विवरण confirmation पछि ३–५ मिनेटभित्र WhatsApp वा Email मा Ebook प्राप्त गर्नुहोस्।" }
+                                        ].map((step, idx) => (
+                                            <div key={idx} className="bg-slate-800 p-5 rounded-2xl border border-slate-700 relative">
+                                                <span className="text-amber-400 font-black text-xl mb-2 block">{step.num}</span>
+                                                <h4 className="font-extrabold text-sm text-white">{step.title}</h4>
+                                                <p className="text-xs text-slate-400 mt-1">{step.desc}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* 11. FAQ ACCORDION SECTION */}
+                            <section id="faqs" className="py-12 bg-white border-b border-amber-200/60">
+                                <div className="max-w-4xl mx-auto px-4">
+                                    <div className="text-center mb-10">
+                                        <span className="text-amber-700 font-bold text-xs uppercase tracking-wider">FREQUENTLY ASKED QUESTIONS</span>
+                                        <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 mt-1">
+                                            अक्सर सोधिने प्रश्नहरू (FAQs)
+                                        </h2>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        {FAQS.map((faq, idx) => {
+                                            const [isOpen, setIsOpen] = useState(false);
+                                            return (
+                                                <div key={idx} className="border border-amber-200 rounded-xl overflow-hidden bg-amber-50/20">
+                                                    <button 
+                                                        onClick={() => setIsOpen(!isOpen)}
+                                                        className="w-full p-4 text-left font-extrabold text-sm text-slate-900 flex justify-between items-center bg-white hover:bg-amber-50/50 transition"
+                                                    >
+                                                        <span>{faq.q}</span>
+                                                        <span className="text-amber-600 text-lg">{isOpen ? "−" : "+"}</span>
+                                                    </button>
+                                                    {isOpen && (
+                                                        <div className="p-4 text-xs text-slate-600 leading-relaxed border-t border-amber-100 bg-amber-50/30">
+                                                            {faq.a}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* 12. AUTHOR SECTION */}
+                            <section id="author" className="py-12 bg-amber-50/60 border-b border-amber-200/60">
+                                <div className="max-w-4xl mx-auto px-4 flex flex-col md:flex-row items-center space-y-6 md:space-y-0 md:space-x-8">
+                                    <div className="w-28 h-28 rounded-2xl bg-slate-900 border-4 border-amber-400 text-amber-400 font-black text-3xl flex items-center justify-center shrink-0 shadow-lg">
+                                        MD.NS
+                                    </div>
+                                    <div>
+                                        <span className="text-amber-800 font-bold text-xs uppercase tracking-wider">ABOUT THE AUTHOR</span>
+                                        <h3 className="text-xl font-extrabold text-slate-900 mt-1">{BRAND_CONFIG.authorName}</h3>
+                                        <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                                            MD. NS Ebook Store को उद्देश्य नेपाली युवा, विद्यार्थी, रोजगारी खोजीमा रहेका व्यक्तिहरूलाई Computer Skills, Digital Skills, Examination Preparation, Share Market र Personality Development सम्बन्धी व्यावहारिक र गुणस्तरीय Ebooks उपलब्ध गराउनु हो।
+                                        </p>
+                                        <div className="mt-4 flex flex-wrap gap-3">
+                                            <a 
+                                                href={`https://wa.me/${BRAND_CONFIG.whatsappRaw}`} 
+                                                target="_blank" 
+                                                rel="noreferrer"
+                                                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center space-x-2 shadow"
+                                            >
+                                                <span>WhatsApp Support (+977 9702784684)</span>
+                                            </a>
+                                            <a 
+                                                href={`mailto:${BRAND_CONFIG.supportEmail}`}
+                                                className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold flex items-center space-x-2 shadow"
+                                            >
+                                                <span>Email: {BRAND_CONFIG.supportEmail}</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </main>
+                    )}
+
+                    {/* 13. FOOTER */}
+                    <footer className="bg-slate-900 text-slate-300 py-10 text-xs border-t border-amber-500/20">
+                        <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
+                            <div>
+                                <h4 className="font-extrabold text-white text-base mb-3">{BRAND_CONFIG.storeName}</h4>
+                                <p className="text-slate-400 leading-relaxed">
+                                    By {BRAND_CONFIG.authorName}. Digital Learning Resources for Nepali youth, students and professionals.
+                                </p>
+                            </div>
+
+                            <div>
+                                <h5 className="font-bold text-white text-sm mb-3">Quick Links</h5>
+                                <ul className="space-y-2">
+                                    <li><button onClick={() => scrollToSection('hero')} className="hover:text-amber-400">Home</button></li>
+                                    <li><button onClick={() => scrollToSection('explore')} className="hover:text-amber-400">Explore Ebooks</button></li>
+                                    <li><button onClick={() => scrollToSection('combos')} className="hover:text-amber-400">Custom Combo Builder</button></li>
+                                    <li><button onClick={() => scrollToSection('bundles')} className="hover:text-amber-400">Best Bundles</button></li>
+                                    <li><button onClick={() => scrollToSection('faqs')} className="hover:text-amber-400">FAQs</button></li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <h5 className="font-bold text-white text-sm mb-3">Contact & Delivery</h5>
+                                <p className="text-slate-400">WhatsApp: +977 9702784684</p>
+                                <p className="text-slate-400 mt-1">Email: mdnasibulrain4@gmail.com</p>
+                                <p className="text-amber-400 mt-2 font-semibold">
+                                    Payment URL: <a href={BRAND_CONFIG.nspayUrl} target="_blank" className="underline">{BRAND_CONFIG.nspayUrl}</a>
+                                </p>
+                                <p className="text-slate-500 text-[11px] mt-1">Manual delivery via WhatsApp/Email within 3–5 minutes post payment verification.</p>
+                            </div>
+
+                            <div>
+                                <h5 className="font-bold text-white text-sm mb-3">Disclaimers & Policies</h5>
+                                <div className="space-y-2 text-[11px] text-slate-400">
+                                    <button onClick={() => setPolicyModalContent({ title: "Privacy Policy", content: "हामी तपाईंको सम्पर्क विवरण र गोपनीयताको पूर्ण सम्मान गर्छौं। कुनै पनि व्यक्तिगत डेटा तेस्रो पक्षलाई बिक्री वा सेयर गरिँदैन।" })} className="block hover:text-amber-400 underline">Privacy Policy</button>
+                                    <button onClick={() => setPolicyModalContent({ title: "Terms & Conditions", content: "Ebooks केवल व्यक्तिगत अध्ययनका लागि हुन्। प्रतिलिपि अधिकार सुरक्षित छ। अनधिकृत पुनःबिक्री मनाही छ।" })} className="block hover:text-amber-400 underline">Terms & Conditions</button>
+                                    <button onClick={() => setPolicyModalContent({ title: "Educational Disclaimer", content: "सामग्री अध्ययन र ज्ञान साक्षरताका लागि हो। यसले शतप्रतिशत रोजगारी वा निश्चित आम्दानीको ग्यारेन्टी गर्दैन।" })} className="block hover:text-amber-400 underline">Educational Disclaimer</button>
+                                    <button onClick={() => setIsAdminMode(true)} className="block text-amber-500 font-bold hover:underline mt-2">⚙️ Product Manager Login</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="max-w-7xl mx-auto px-4 mt-8 pt-4 border-t border-slate-800 text-center text-[11px] text-slate-500">
+                            © {new Date().getFullYear()} {BRAND_CONFIG.storeName}. All rights reserved.
+                        </div>
+                    </footer>
+
+                    {/* 14. SHOPPING CART DRAWER */}
+                    {isCartOpen && (
+                        <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/60 backdrop-blur-xs">
+                            <div className="w-full max-w-md bg-white h-full shadow-2xl flex flex-col justify-between p-6 overflow-y-auto">
+                                <div>
+                                    <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                                        <h3 className="font-black text-lg text-slate-900">🛒 Your Shopping Cart</h3>
+                                        <button 
+                                            onClick={() => setIsCartOpen(false)}
+                                            className="text-slate-400 hover:text-slate-600 text-lg font-bold"
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+
+                                    {cart.length === 0 ? (
+                                        <div className="text-center py-16 space-y-3">
+                                            <span className="text-4xl">🛒</span>
+                                            <p className="text-slate-500 font-semibold text-sm">तपाईंको Cart खाली छ।</p>
+                                            <button 
+                                                onClick={() => { setIsCartOpen(false); scrollToSection('explore'); }}
+                                                className="px-4 py-2 bg-amber-500 text-slate-950 font-bold text-xs rounded-xl"
+                                            >
+                                                Ebooks Browse गर्नुहोस्
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="py-4 space-y-4">
+                                            {cart.map(item => (
+                                                <div key={item.id} className="flex items-center space-x-3 p-3 rounded-xl border border-amber-200 bg-amber-50/20">
+                                                    <img src={item.cover} alt="" className="w-12 h-16 object-cover rounded shadow shrink-0" />
+                                                    <div className="flex-grow">
+                                                        <span className="text-[10px] font-bold text-amber-800 uppercase">{item.type}</span>
+                                                        <h4 className="font-extrabold text-xs text-slate-900 line-clamp-1">{item.title}</h4>
+                                                        <div className="mt-1 flex items-center justify-between">
+                                                            <span className="font-black text-amber-700 text-xs">रु. {item.salePrice}</span>
+                                                            <div className="flex items-center space-x-2">
+                                                                <button onClick={() => updateCartQuantity(item.id, -1)} className="px-1.5 py-0.5 bg-slate-200 rounded text-xs font-bold">-</button>
+                                                                <span className="text-xs font-bold">{item.quantity}</span>
+                                                                <button onClick={() => updateCartQuantity(item.id, 1)} className="px-1.5 py-0.5 bg-slate-200 rounded text-xs font-bold">+</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <button onClick={() => removeFromCart(item.id)} className="text-red-500 hover:text-red-700 text-sm font-bold p-1">✕</button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {cart.length > 0 && (
+                                    <div className="pt-4 border-t border-slate-200 space-y-3">
+                                        <div className="space-y-1 text-xs">
+                                            <div className="flex justify-between text-slate-500">
+                                                <span>Subtotal:</span>
+                                                <span className="line-through">रु. {cartTotals.subtotal}</span>
+                                            </div>
+                                            <div className="flex justify-between text-emerald-700 font-bold">
+                                                <span>Total Savings:</span>
+                                                <span>- रु. {cartTotals.savings}</span>
+                                            </div>
+                                            <div className="flex justify-between text-base font-black text-slate-900 pt-1 border-t border-slate-100">
+                                                <span>Final Total:</span>
+                                                <span className="text-amber-700">रु. {cartTotals.finalTotal}</span>
+                                            </div>
+                                        </div>
+
+                                        <p className="text-[11px] text-slate-500 bg-amber-50 p-2 rounded border border-amber-200">
+                                            ℹ️ Payment NSPAY Page मा हुनेछ। Payment पश्चात Screenshot WhatsApp (+977 9702784684) मा पठाउनुपर्छ।
+                                        </p>
+
+                                        <a 
+                                            href={BRAND_CONFIG.nspayUrl} 
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="block w-full py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs text-center uppercase tracking-wider rounded-xl shadow-md transition"
+                                        >
+                                            NSPAY मा Payment गर्न जानुहोस् ➔
+                                        </a>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 15. MOBILE BOTTOM NAVIGATION */}
+                    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-amber-300 z-30 px-2 py-2 flex items-center justify-around shadow-lg">
+                        <button onClick={() => scrollToSection('hero')} className="flex flex-col items-center text-slate-700 hover:text-amber-600">
+                            <span className="text-base">🏠</span>
+                            <span className="text-[10px] font-bold">HOME</span>
+                        </button>
+                        <button onClick={() => scrollToSection('explore')} className="flex flex-col items-center text-slate-700 hover:text-amber-600">
+                            <span className="text-base">📚</span>
+                            <span className="text-[10px] font-bold">EBOOKS</span>
+                        </button>
+                        <button onClick={() => setIsCartOpen(true)} className="flex flex-col items-center text-slate-700 hover:text-amber-600 relative">
+                            <span className="text-base">🛒</span>
+                            <span className="text-[10px] font-bold">CART</span>
+                            {cartTotals.count > 0 && (
+                                <span className="absolute -top-1 right-1 bg-amber-600 text-white font-black text-[9px] w-4 h-4 rounded-full flex items-center justify-center">
+                                    {cartTotals.count}
+                                </span>
+                            )}
+                        </button>
+                        <button onClick={() => scrollToSection('combos')} className="flex flex-col items-center text-slate-700 hover:text-amber-600">
+                            <span className="text-base">🎁</span>
+                            <span className="text-[10px] font-bold">OFFERS</span>
+                        </button>
+                        <button onClick={() => setIsAdminMode(!isAdminMode)} className="flex flex-col items-center text-amber-700 hover:text-amber-900">
+                            <span className="text-base">⚙️</span>
+                            <span className="text-[10px] font-bold">ADMIN</span>
+                        </button>
+                    </nav>
+
+                    {/* 16. PRODUCT DETAILS MODAL */}
+                    {activeModalProduct && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+                            <div className="bg-white max-w-2xl w-full rounded-2xl border-2 border-amber-400 shadow-2xl max-h-[90vh] overflow-y-auto p-6 relative">
+                                <button 
+                                    onClick={() => setActiveModalProduct(null)}
+                                    className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-lg"
+                                >
+                                    ✕
+                                </button>
+
+                                <div className="flex flex-col md:flex-row gap-6">
+                                    <img 
+                                        src={activeModalProduct.coverImage?.source} 
+                                        alt="" 
+                                        className="w-full md:w-48 h-64 object-cover rounded-xl shadow-md border border-amber-200 cursor-pointer"
+                                        onClick={() => setPreviewImageAsset(activeModalProduct.coverImage?.source)}
+                                    />
+                                    <div className="space-y-3">
+                                        <span className="bg-amber-100 text-amber-800 text-[10px] font-black px-2 py-0.5 rounded uppercase">
+                                            {activeModalProduct.category}
+                                        </span>
+                                        <h3 className="text-xl font-extrabold text-slate-900 leading-snug">{activeModalProduct.title}</h3>
+                                        <p className="text-xs text-slate-500">{activeModalProduct.subtitle}</p>
+
+                                        <div className="flex items-center space-x-3 text-xs font-bold text-amber-800">
+                                            <span>📄 {activeModalProduct.pages} Pages</span>
+                                            <span>•</span>
+                                            <span>📚 {activeModalProduct.chapters} Chapters</span>
+                                            <span>•</span>
+                                            <span>⭐ {activeModalProduct.rating}</span>
+                                        </div>
+
+                                        <div className="pt-2">
+                                            <span className="text-2xl font-black text-amber-700">रु. {activeModalProduct.pricing?.salePrice || activeModalProduct.salePrice}</span>
+                                            <span className="ml-2 text-xs text-slate-400 line-through">रु. {activeModalProduct.pricing?.regularPrice || activeModalProduct.regularPrice}</span>
+                                        </div>
+
+                                        <div className="flex space-x-2 pt-2">
+                                            <button 
+                                                onClick={() => {
+                                                    setPreviewPdfAsset(activeModalProduct.previewPdf || "demo");
+                                                }}
+                                                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl border border-slate-300"
+                                            >
+                                                📄 Preview PDF
+                                            </button>
+                                            <button 
+                                                onClick={() => {
+                                                    addToCart(activeModalProduct, "single");
+                                                    setActiveModalProduct(null);
+                                                }}
+                                                className="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs rounded-xl shadow"
+                                            >
+                                                Cart मा थप्नुहोस् 🛒
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Chapters outline */}
+                                <div className="mt-6 pt-4 border-t border-slate-100">
+                                    <h4 className="font-extrabold text-sm text-slate-900 mb-3">📚 Chapter Outline</h4>
+                                    <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                                        {activeModalProduct.chapterOutline?.map(ch => (
+                                            <div key={ch.number} className="p-2.5 rounded-lg bg-amber-50/40 border border-amber-200/60 text-xs">
+                                                <span className="font-bold text-amber-800">Chapter {ch.number}: {ch.title}</span>
+                                                <p className="text-[11px] text-slate-500 mt-0.5">{ch.description}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 17. SAMPLE PDF PREVIEW MODAL */}
+                    {previewPdfAsset && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xs">
+                            <div className="bg-white max-w-3xl w-full h-[80vh] rounded-2xl border-2 border-amber-400 shadow-2xl flex flex-col p-4 relative">
+                                <div className="flex justify-between items-center pb-3 border-b border-slate-200">
+                                    <h4 className="font-extrabold text-sm text-slate-900">📄 Sample Chapter Preview</h4>
+                                    <button onClick={() => setPreviewPdfAsset(null)} className="font-bold text-slate-400 hover:text-slate-600">✕</button>
+                                </div>
+
+                                <div className="flex-grow my-4 bg-slate-100 rounded-xl overflow-hidden flex items-center justify-center">
+                                    {typeof previewPdfAsset === "object" && previewPdfAsset?.source ? (
+                                        <iframe src={previewPdfAsset.source} className="w-full h-full"></iframe>
+                                    ) : (
+                                        <div className="text-center p-6 space-y-3 max-w-md">
+                                            <span className="text-4xl">📄</span>
+                                            <h5 className="font-bold text-slate-800 text-sm">Sample PDF Preview</h5>
+                                            <p className="text-xs text-slate-500 leading-relaxed">
+                                                यहाँ यस Ebook को नमुना अध्याय प्रदर्शन गरिन्छ। सम्पूर्ण Ebook Payment पुष्टि भएपछि WhatsApp वा Email मा पठाइनेछ।
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 18. IMAGE LIGHTBOX MODAL */}
+                    {previewImageAsset && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" onClick={() => setPreviewImageAsset(null)}>
+                            <div className="max-w-xl w-full p-2 relative">
+                                <img src={previewImageAsset} alt="" className="w-full h-auto rounded-2xl shadow-2xl border-2 border-amber-400" />
+                                <span className="absolute top-4 right-4 text-white text-xs bg-slate-900/80 px-2 py-1 rounded cursor-pointer">✕ Close</span>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 19. POLICY MODAL */}
+                    {policyModalContent && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60">
+                            <div className="bg-white max-w-md w-full p-6 rounded-2xl border-2 border-amber-400 shadow-2xl space-y-4">
+                                <h4 className="font-extrabold text-base text-slate-900">{policyModalContent.title}</h4>
+                                <p className="text-xs text-slate-600 leading-relaxed">{policyModalContent.content}</p>
+                                <button onClick={() => setPolicyModalContent(null)} className="w-full py-2 bg-amber-500 text-slate-950 font-bold text-xs rounded-xl">
+                                    बुझें (Close)
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // RENDER APPLICATION
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
